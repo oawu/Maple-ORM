@@ -6,7 +6,7 @@ class User extends Model {
   // static $tableName = 'users';
   // static $primaries = ['id'];
   // static $updateAt = 'updated_at';
-  // static $createAt = 'updated_at';
+  // static $createAt = 'created_at';
 
   // static $afterCreates = ['methodName'];
   // static $afterDeletes = ['methodName'];
