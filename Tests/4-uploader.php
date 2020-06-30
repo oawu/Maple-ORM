@@ -1,28 +1,14 @@
 <?php
 
-if (\M\Core\Connection::instance()->query('show tables;', [], $sth)) {
-  var_dump('show tables Error');
-  exit(1);
-}
+include '_.php';
 
-$tables = [];
-foreach ($sth->fetchAll() as $row)
-  array_push($tables, array_shift($row));
-
-foreach ($tables as $table) {
-  if (\M\Core\Connection::instance()->query('DROP TABLE IF EXISTS `' . $table . '`;')) {
-    var_dump('drop table `' . $table . '` Error');
-    exit(1);
-  }
-}
+\M\Model::case(\M\Model::CASE_CAMEL);
 
 $sql = "CREATE TABLE `User` (`id` int(10) unsigned NOT NULL AUTO_INCREMENT, `a` varchar(190) CHARACTER SET utf8mb4 DEFAULT NULL, `b` text COLLATE utf8mb4_unicode_ci, `c` enum('a') COLLATE utf8mb4_unicode_ci DEFAULT NULL, `d` datetime DEFAULT NULL, `e` timestamp NULL DEFAULT NULL, `f` time DEFAULT NULL, `g` date DEFAULT NULL, `h` float DEFAULT NULL, `i` double DEFAULT NULL, `j` decimal(10,2) DEFAULT NULL, `k` json DEFAULT NULL, `a1` varchar(190) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '', `b1` text COLLATE utf8mb4_unicode_ci NOT NULL, `c1` enum('a','b') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'a', `d1` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, `e1` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `f1` time NOT NULL, `g1` date NOT NULL, `h1` float NOT NULL, `i1` double NOT NULL, `j1` decimal(10,2) NOT NULL, `k1` json NOT NULL, `avatar` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `zip` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `updateAt` datetime DEFAULT NULL, `createAt` datetime DEFAULT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 if (\M\Core\Connection::instance()->query($sql)) {
   var_dump('create User table Error');
   exit(1);
 }
-
-\M\Model::case(\M\Model::CASE_CAMEL);
 
 $user = \M\User::create(['a' => '123', 'a1' => '123', 'b1' => '123', 'c1' => 'a', 'd1' => new DateTime("2020-10-22 12:12:12"), 'e1' => '2020-10-22 12:12:12', 'f1' => '12:12:12', 'g1' => '2020-10-22', 'h1' => '123', 'i1' => '123', 'j1' => '123', 'k1' => []]);
 
@@ -77,7 +63,7 @@ echo "avatar clean files";
 echo " - ok\n";
 
 echo "avatar put url";
-$user->avatar->put('https://www.ioa.tw/img/2649ac3f3f605e0474053e8505e01247.jpg') || exit('- error');
+$user->avatar->put('http://dev.orm.ioa.tw/Sample/cover.jpg') || exit('- error');
 echo " - ok\n";
 
 $path = PATH_SAMPLE . 'avatar2.jpg';

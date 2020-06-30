@@ -1,20 +1,6 @@
 <?php
 
-if (\M\Core\Connection::instance()->query('show tables;', [], $sth)) {
-  var_dump('show tables Error');
-  exit(1);
-}
-
-$tables = [];
-foreach ($sth->fetchAll() as $row)
-  array_push($tables, array_shift($row));
-
-foreach ($tables as $table) {
-  if (\M\Core\Connection::instance()->query('DROP TABLE IF EXISTS `' . $table . '`;')) {
-    var_dump('drop table `' . $table . '` Error');
-    exit(1);
-  }
-}
+include '_.php';
 
 $sql = "CREATE TABLE `books` (`id` int(11) unsigned NOT NULL AUTO_INCREMENT, `owner_id` int(10) unsigned NOT NULL DEFAULT '0', `title` varchar(190) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '', `fake_id` int(11) DEFAULT NULL, `score` int(11) DEFAULT NULL, `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, `content` text COLLATE utf8mb4_unicode_ci, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 if (\M\Core\Connection::instance()->query($sql)) {
