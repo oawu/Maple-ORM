@@ -142,8 +142,8 @@ $uploader->driver('S3', [
 // 指定系統暫存目錄當暫存目錄
 $uploader->tmpDir(sys_get_temp_dir() . DIRECTORY_SEPARATOR);
 
-// 儲存的根目錄名稱
-$uploader->rootDirs('dir1', 'dir2');
+// 儲存的基礎名稱
+$uploader->baseDirs('dir1', 'dir2');
 
 // 基礎網址
 $uploader->baseURL('http://demo.ioa.tw/');

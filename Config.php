@@ -43,7 +43,7 @@
 
   $uploader->driver('Local', ['dir' => PATH]);
   $uploader->tmpDir(sys_get_temp_dir() . DIRECTORY_SEPARATOR);
-  $uploader->rootDirs('Storage');
+  $uploader->baseDirs('Storage');
   $uploader->baseURL('http://dev.orm.ioa.tw/');
   $uploader->default('http://dev.orm.ioa.tw/404.png');
 

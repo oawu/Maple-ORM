@@ -274,21 +274,28 @@ namespace M {
     return array_shift($className);
   }
 
-  function transaction($closure, &...$args) {
+  function transaction($closure, &$errors = []) {
     $instance = Connection::instance();
 
     try {
-      if (!$instance->beginTransaction())
-        return ['Transaction 失敗'];
+      if (!$instance->beginTransaction()) {
+        $errors = ['Transaction 失敗'];
+        return null;
+      }
       
-      if (call_user_func_array($closure, $args))
-        return $instance->commit() ? [] : ['Commit 失敗'];
+      if ($result = $closure()) {
+        if ($instance->commit()) return $result;
+        $errors = ['Commit 失敗'];
+        return null;
+      }
 
       throw new \Exception('transaction 回傳 false，故 rollback');
     } catch (\Exception $e) {
-      return $instance->rollback()
+      $errors = $instance->rollback()
         ? [$e->getMessage()]
         : ['Rollback 失敗', $e->getMessage()];
+
+      return null;
     }
 
     return ['不明原因錯誤！'];
@@ -301,7 +308,7 @@ namespace M {
     static $createAt = 'createAt';
     static $updateAt = 'updateAt';
 
-    public static  $validOptions = ['where', 'limit', 'offset', 'order', 'select', 'group', 'having', 'pre-relation', 'pre'];
+    public static  $validOptions = ['where', 'limit', 'offset', 'order', 'select', 'group', 'having', 'pre-relation', 'relation', 'pre'];
     
     private static $logger = null;
     private static $errorFunc = null;
@@ -373,7 +380,8 @@ namespace M {
       return static::table()->find($options);
     }
 
-    public static function create($attrs = []) {
+    public static function create($attrs = [], $allow = []) {
+      $allow && $attrs = array_intersect_key($attrs, array_flip($allow));
       $className = static::class;
       $model = new $className($attrs, true);
       return $model->save();
@@ -475,7 +483,7 @@ namespace M {
 
         foreach ($objs as $obj) {
           $tmps[$obj->$foreign] ?? $tmps[$obj->$foreign] = [];
-          $obj->relations[$name] = $method == 'one' ? $tmps[$obj->$foreign][0] : $tmps[$obj->$foreign];
+          $obj->relations[$name] = $method == 'one' ? $tmps[$obj->$foreign][0] ?? null : $tmps[$obj->$foreign];
         }
 
         return $objs;
@@ -653,7 +661,7 @@ namespace M {
 
     public function delete() {
       if (!$primaries = $this->primaries())
-        return !Model::log('刪除資料失敗，錯誤原因：找不到 Primary Key');
+        return Model::log('刪除資料失敗，錯誤原因：找不到 Primary Key');
 
       if (!static::table()->delete($primaries))
         return false;
@@ -666,7 +674,7 @@ namespace M {
         method_exists($this, $afterDelete) || Model::error('Model「' . static::class . '」內沒有名為「' . $afterDelete . '」的 method');
 
         if (!$return = $this->$afterDelete($return))
-          return !Model::log('Model「' . static::class . '」執行「' . $afterDelete . '」after create 失敗');
+          return Model::log('Model「' . static::class . '」執行「' . $afterDelete . '」after create 失敗');
       }
       return true;
     }
@@ -709,6 +717,17 @@ namespace M {
       $options = array_intersect_key($options, array_flip(Model::$validOptions));
 
       return $where;
+    }
+
+    public function set($attrs = [], $allow = [], $save = false) {
+      $allow === true  && ($save = $allow) && $allow = [];
+      $allow === false && !($save = $allow) && $allow = [];
+      $allow && $attrs = array_intersect_key($attrs, array_flip($allow));
+
+      foreach ($attrs as $key => $val)
+        $this->$key = $val;
+
+      return $save ? $this->save() : $this;
     }
 
     private function updateAttr($name, $value) {
@@ -890,18 +909,22 @@ namespace M\Core {
     }
 
     public function one(...$args) {
+      isset($args[0]) && is_string($args[0]) && $args = [['select' => $args[0]]];
       return $this->get('one', ...$args);
     }
 
     public function first(...$args) {
+      isset($args[0]) && is_string($args[0]) && $args = [['select' => $args[0]]];
       return $this->get('first', ...$args);
     }
 
     public function last(...$args) {
+      isset($args[0]) && is_string($args[0]) && $args = [['select' => $args[0]]];
       return $this->get('last', ...$args);
     }
 
     public function all(...$args) {
+      isset($args[0]) && is_string($args[0]) && $args = [['select' => $args[0]]];
       return $this->get('all', ...$args);
     }
 
@@ -913,8 +936,9 @@ namespace M\Core {
       return $this->get('deleteAll', ...$args);
     }
 
-    public function update(...$data) {
-      return call_user_func_array([$this->model, 'updateAll'], $data);
+    public function update(...$args) {
+      isset($args['where']) ? $args['where']->and($this) : $args['where'] = $this;
+      return call_user_func_array([$this->model, 'updateAll'], $args);
     }
 
     private function get($type, ...$args) {
@@ -947,7 +971,7 @@ namespace M\Core {
       return $this->findBySQL(
         $sql->getRaw(),
         $sql->getVals(),
-        $options['pre-relation'] ?? $options['pre'] ?? []);
+        $options['pre-relation'] ?? $options['relation'] ?? $options['pre'] ?? []);
     }
 
     public function findBySQL($sql, $values = [], $preRelations = []) {
@@ -1166,10 +1190,7 @@ namespace M\Core {
       empty($options['order']) || array_push($strs, 'ORDER BY', $options['order']);
 
       $limit = empty($options['limit']) ? 0 : intval($options['limit']);
-      $offset = empty($options['offset']) ? 0 : intval($options['offset']);
-
-      if ($limit || $offset)
-        array_push($strs, 'LIMIT', intval($offset) . ', ' . intval($limit));
+      $limit && array_push($strs, 'LIMIT', intval($limit));
 
       return new self(implode(' ', array_filter($strs)), $vals);
     }
@@ -1231,10 +1252,7 @@ namespace M\Core {
       empty($options['order']) || array_push($strs, 'ORDER BY', $options['order']);
 
       $limit = empty($options['limit']) ? 0 : intval($options['limit']);
-      $offset = empty($options['offset']) ? 0 : intval($options['offset']);
-
-      if ($limit || $offset)
-        array_push($strs, 'LIMIT', intval($offset) . ', ' . intval($limit));
+      $limit && array_push($strs, 'LIMIT', intval($limit));
 
       return new self(implode(' ', array_filter($strs)), $vals);
     }
@@ -1317,7 +1335,7 @@ namespace M\Core {
       return $this;
     }
 
-    public function query($sql, $vals = [], &$sth = null, $fetchModel = \PDO::FETCH_ASSOC) {
+    public function query($sql, $vals = [], &$sth = null, $fetchModel = \PDO::FETCH_ASSOC, $log = true) {
       try {
         if (!$sth = $this->prepare((string)$sql))
           return '執行 Connection prepare 失敗';
@@ -1328,7 +1346,7 @@ namespace M\Core {
         $status = $sth->execute($vals);
 
         $logger = self::$logger ?? null;
-        $logger && $logger($sql, $vals, $status, \number_format((\microtime(true) - $start) * 1000, 1));
+        $logger && $logger($sql, $vals, $status, \number_format((\microtime(true) - $start) * 1000, 1), $log);
 
         if (!$status)
           return '執行 Connection execute 失敗';
@@ -1347,7 +1365,7 @@ namespace M\Core {
     private $database = null;
     private $encoding = 'utf8mb4';
 
-    public function __construct($options) {
+    public function __construct($options = []) {
       foreach (array_intersect_key($options, array_flip(['hostname', 'username', 'password', 'database', 'encoding'])) as $key => $value)
         $this->$key($value);
     }
@@ -1628,7 +1646,7 @@ namespace M\Core\Plugin {
     protected $baseURL    = '';
     protected $driver     = null;
     protected $tmpDir     = DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR;
-    protected $rootDirs   = [];
+    protected $baseDirs   = [];
 
     public function __construct() {
       $func = self::$func ?? null;
@@ -1648,8 +1666,8 @@ namespace M\Core\Plugin {
       return $this;
     }
 
-    public function rootDirs(...$dirs) {
-      $this->rootDirs = $dirs;
+    public function baseDirs(...$dirs) {
+      $this->baseDirs = $dirs;
       return $this;
     }
 
@@ -1684,10 +1702,10 @@ namespace M\Core\Plugin {
     }
 
     public function dirs() {
-      return array_merge($this->rootDirs, $this->paths());
+      return array_merge($this->baseDirs, $this->paths());
     }
 
-    public function put($file) {
+    public function put($file, $save = false) {
       if (!extract($this->putFileCheck($file)))
         return false;
 
@@ -1698,7 +1716,7 @@ namespace M\Core\Plugin {
 
       $this->model->{$this->column} = $name;
 
-      return true;
+      return $save ? $this->model->save() : true;
     }
 
     public function url($key = '') {
@@ -1877,12 +1895,12 @@ namespace M\Core\Plugin\Uploader {
       return $this;
     }
 
-    public function put($file) {
+    public function put($file, $save = false) {
       if (!$thumbnail = self::$thumbnail)
-        return parent::put($file);
+        return parent::put($file, $save);
 
       if (!$versions = $this->versions())
-        return parent::put($file);
+        return parent::put($file, $save);
       
       if (!extract($this->putFileCheck($file)))
         return false;
@@ -1895,6 +1913,7 @@ namespace M\Core\Plugin\Uploader {
 
       try {
         $image = $thumbnail($tmpPath);
+        $image->logger(function(...$args) { Model::log(...$args); });
 
         $image->rotate($orientation);
         $name = static::randomName() . (static::AUTO_FORMAT ? $format ?? ('.' . $image->getFormat()) : '');
@@ -1938,7 +1957,7 @@ namespace M\Core\Plugin\Uploader {
 
       $this->model->{$this->column} = $name;
 
-      return true;
+      return $save ? $this->model->save() : true;
     }
 
     public function url($key = '') {
