@@ -758,7 +758,7 @@ namespace M {
       }
 
       return static::table()->update(array_intersect_key($this->attrs, $this->dirty), $primaries)
-        ? $this
+        ? $this->cleanFlagDirty()
         : null;
     }
 
@@ -1441,6 +1441,10 @@ namespace M\Core {
     public function isNull() {
       return $this->value === null;
     }
+    
+    public function isEmpty() {
+      return $this->value === null || $this->value === '';
+    }
   }
 
   abstract class Inflect {
@@ -1619,7 +1623,7 @@ namespace M\Core\Plugin {
     }
 
     public function setValue($value = null) {
-      parent::setValue($value);
+      parent::setValue($value === 'CURRENT_TIMESTAMP' ? \date(DateTime::FORMAT_DATETIME) : $value);
       $this->datetime = $this->value !== null
         ? $this->value instanceof \DateTime
           ? $this->value
