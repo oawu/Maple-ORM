@@ -8,8 +8,8 @@
   * 專案 Model 的命名規則
 
 * 非必須
-  * 指定 query logger 函式
-  * 指定 model logger 函式
+  * 指定 query log 函式
+  * 指定 model log 函式
   * 指定 errorFunc 函式
   * 指定 cacheFunc 函式
   * 設定所有上傳器預設值
@@ -65,7 +65,7 @@
 \M\Model::case(\M\Model::CASE_SNAKE);
 ```
 
-## 指定 query logger 函式
+## 指定 query log 函式
 紀錄程式執行過程中對資料庫所下的 sql query，參數分別：
 
 1. SQL 字串
@@ -74,15 +74,15 @@
 4. 耗時，單位為 1/1000 秒
 
 ```php
-\M\Model::queryLogger(function($sql, $vals, $status, $during) {
+\M\Model::queryLogFunc(function($sql, $vals, $status, $during) {
 });
 ```
 
-## 指定 model logger 函式
+## 指定 model log 函式
 發生**可允許**的錯誤時，紀錄其原因，例如新增失敗時的原因。參數為字串。
 
 ```php
-\M\Model::logger(function($log) {
+\M\Model::logFunc(function($log) {
 });
 ```
 

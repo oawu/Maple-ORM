@@ -15,3 +15,5 @@ foreach ($tables as $table) {
     exit(1);
   }
 }
+
+\M\Model::case(\M\Model::CASE_CAMEL);

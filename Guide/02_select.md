@@ -54,26 +54,21 @@ foreach ($users as $user) {
 ```
 
 ## 使用條件
-主要分兩種方式：
 
-1. **方法優先**
-2. **條件優先**
+規則基本上如下：
 
-```php
-// 方法優先
-$user = \M\User::one(['where' => ['age < ? AND id > ?', 20, 1]]);
-echo $user->name; // OC
+```
+ Model::
+   [where, whereIn, whereNotIn, whereBetween, select, order, group, having, limit, offset, keyBy, relation]
+   [where, whereIn, whereNotIn, whereBetween, select, order, group, having, limit, offset, keyBy, relation, orWhere, orWhereIn, orWhereNotIn, orWhereBetween]*
+   [one, first, last, all, count, update, delete]()
 
-// 條件優先
-$user = \M\User::where('age < ?', 20)->and('id > ?', 1)->one();
-echo $user->name; // OC
+ Model::
+   [create, creates, truncate, one, first, last, all, count, update, delete]()
 ```
 
-## 簡寫
-在沒有其他條前如 `select`、`limit`、`offset`、`order` 時，會以「**方法優先**」為主要寫法，並且可採用**簡寫**的方式。
-
 ```php
-$user = \M\User::one('age < ? AND id > ?', 20, 1);
+$user = \M\User::where('age < ?', 20)->and('id > ?', 1)->one();
 echo $user->name; // OC
 ```
 
@@ -84,35 +79,16 @@ $user = \M\User::one(2);
 echo $user->name; // OB
 ```
 
-> 這邊可能會有疑問，為何要用 `["id > ?", 1]` 的方式，而並不是直接 `"id > 1"`，主要是以 PHP PDO 的 `prepare` 與 `execute` 角度設計，參考[此篇](https://www.php.net/manual/en/pdo.prepare.php)
-
-> 採用此方式可以增加安全性，防止可能的 sql injection，當然如果有些確定值要直接 "id > 1" 也是可以的，如果是字串的查詢，仍建議拆開，如下範例：
-
-```php
-$user = \M\User::one(['where' => 'age < 20 AND id > 1']);
-echo $user->name; // OC
-
-$user = \M\User::one('age < 20 AND id > 1');
-echo $user->name; // OC
-
-$user = \M\User::where('age < 20 AND id > 1')->one();
-echo $user->name; // OC
-```
-
-
 ## Where IN
-寫法必須採用 `(?)` 並給予對應的陣列參數。
 
 ```php
-// 方法優先的寫法
-$users = \M\User::all('id IN (?)', [1, 3]);
+$users = \M\User::all([1, 3]); // id IN [1, 3]
 foreach ($users as $user) {
   echo $user->name;
   // 會依序印出 OA、OC
 }
 
-// 條件優先的寫法
-$users = \M\User::where('id IN (?)', [1, 3])->all();
+$users = \M\User::whereIn('id', [1, 3])->all();
 foreach ($users as $user) {
   echo $user->name;
   // 會依序印出 OA、OC
@@ -120,35 +96,17 @@ foreach ($users as $user) {
 ```
 
 ## 進階條件
-需要加入 `limit`、`offset` 時就不可簡寫。
+加入 `limit`、`offset` 
 
 ```php
-// 方法優先的寫法
-$user = \M\User::one([
-  'limit' => 10,
-  'offset' => 1,
-  'where' => ['id > ?', 0]]);
-echo $user->name; // OB
-
-// 條件優先的寫法
-$user = \M\User::where('id > ?', 0)->one([
-  'limit' => 11,
-  'offset' => 1]);
+$user = \M\User::limit(11)->offset(1)->where('id', '>', 0)->one();
 echo $user->name; // OB
 ```
 
 以上介紹的條件，不只在 `one` 可以用，如開始提到的 `one`、`first`、`last`、`all` 皆可使用。
 
 ```php
-// 方法優先的寫法
-$users = \M\User::all('id > ?', 1);
-foreach ($users as $user) {
-  echo $user->name;
-  // 會依序印出 OB、OC
-}
-
-// 條件優先的寫法
-$users = \M\User::where('id > ?', 1)->all();
+$users = \M\User::where('id', '>', 1)->all();
 foreach ($users as $user) {
   echo $user->name;
   // 會依序印出 OB、OC
@@ -168,12 +126,7 @@ echo $total; // 3
 count 亦可配合上述的條件情境使用。
 
 ```php
-// 方法優先的寫法
-$total = \M\User::count('id > 1');
-echo $total; // 2
-
-// 條件優先的寫法
-$total = \M\User::where('id > ?', 1)->count();
+$total = \M\User::where('id', '>', 1)->count();
 echo $total; // 2
 ```
 
@@ -200,4 +153,24 @@ echo $users[1]->name; // OB
 
 $users = \M\User::all('id IN (?)', [4, 5, 6]);
 echo count($users); // 0
+```
+
+## keyBy
+由 `all` 的結果可以取得查詢後的 **Model 陣列**，但有時候我們希望藉由某個欄位做分類，如下面例子需要依據取得後的物件 `id` 做排序，正常寫法為：
+
+```php
+$users = \M\User::all();
+$byIdUsers = [];
+foreach ($users as $user) {
+  $byIdUsers[$user->id] ?? $byIdUsers[$user->id] = [];
+  array_push($byIdUsers[$user->id], $user);
+}
+var_dump($byIdUsers);
+```
+
+可以使用 `keyBy` 函式也可以達到相同的效果。
+
+```php
+$users = \M\User::keyBy('id')->all();
+var_dump($users);
 ```

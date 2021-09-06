@@ -1,4 +1,4 @@
-# pre-relation
+# relation
 預先關聯
 
 ## 情境
@@ -39,15 +39,15 @@
 namespace M;
 
 class User extends Model {
-  static $relations = [
-    'articles' => '<= Article'
-  ];
+  public function articles() {
+    return hasMany(Article::class);
+  }
 }
 
 class Article extends Model {
-  static $relations = [
-    'comments' => '<= Comment'
-  ];
+  public function comments() {
+    return hasMany(Comment::class);
+  }
 }
 
 class Comment extends Model {}
@@ -60,7 +60,7 @@ class Comment extends Model {}
 
 單筆 `User` 下取得其所有 `Article` 的例子而言，程式碼會下兩次 Query 跟資料庫索取資料。
 
-> 這部分可以用 `\M\Model::queryLogger` 開啟檢視 `Query Log`，詳細設定可以參考 [初始設定](00_config.md)。
+> 這部分可以用 `\M\Model::queryLogFunc` 開啟檢視 `Query Log`，詳細設定可以參考 [初始設定](00_config.md)。
 
 ```php
 $user = \M\User::one(1);
@@ -81,6 +81,7 @@ VAL：[1]
 ```
 
 由 `Query Log` 可得知，在執行 `$user = \M\User::one(1);` 時會先產生第一次的 Query，而在讀取 `$user->articles` 時，會下第二次的 Query
+
 
 ### 問題
 
@@ -126,10 +127,10 @@ VAL：[3]
 
 ### 解法
 
-理解原理與問題後，就可以使用 **預先關聯** 來解決此問題。因為知道知道取得所有 `User` 之後，會接著取得各個 `User` 各自的 `Article`，所以就可以使用 `pre-relation` 參數來將後面即將執行的 Query 集合起來。
+理解原理與問題後，就可以使用 **預先關聯** 來解決此問題。因為知道知道取得所有 `User` 之後，會接著取得各個 `User` 各自的 `Article`，所以就可以使用 `relation` 參數來將後面即將執行的 Query 集合起來。
 
 ```php
-$users = \M\User::all(['pre-relation' => ['articles']]);
+$users = \M\User::relation('articles')->all();
 foreach ($users as $user) {
   echo $user->name;
 
@@ -164,7 +165,7 @@ VAL：[1,2,3]
 
 上述解法有提到，系統是採用 `WHERE IN` 的方式解決迴圈下的關聯所產生的大量 Query，將 `WHERE IN` 所取得的 `Article` 藉由期 `主鍵` 與 `外鍵` 關係分配回去。
 
-試著想像沒有 `pre-relation` 的情境下，你會如何解決 `N + 1` 的 Query 問題？
+試著想像沒有 `relation` 的情境下，你會如何解決 `N + 1` 的 Query 問題？
 
 ```php
 $users = \M\User::all();
@@ -175,7 +176,7 @@ $userIds = array_map(function($user) {
 }, $users);
 
 // 取出這些 User 的所有 Article
-$allArticles = \M\Article::all('userId IN (?)', $userIds);
+$allArticles = \M\Article::whereIn('userId', $userIds)->all();
 
 // 以 userId 為 key 組合出各個 User 所屬的 Article
 $articles = [];
@@ -220,71 +221,4 @@ VAL：[1,2,3]
 
 最後在執行每一個 `User` 時，再依依的找出所屬的 Article。
 
-而 `pre-relation` 就是在系統層面就幫你處理完這些複雜的分類問題了。
-
-## 簡寫
-
-預先關聯的關鍵字為 `pre-relation`，其實也可使用 `pre` 替代，如 `\M\User::all(['pre' => ['articles']]);`，而當要預先關聯的 $relations 只有一項時，也可以在簡寫成 `\M\User::all(['pre' => 'articles']);`，上面的範例若用簡寫則如下：
-
-```php
-$users = \M\User::all(['pre' => 'articles']);
-foreach ($users as $user) {
-  echo $user->name;
-
-  foreach ($user->articles as $article) {
-    echo $article->title;
-  }
-
-  // 依序會印出
-  // "OA"
-  // "文章 1"、"文章 3"、"文章 4"
-  // "OB"
-  // "文章 2"
-  // "OC"
-}
-```
-
-## 多階層
-
-如果再多一張 `Comment` 的表需要關聯，其預先關聯寫法就用 `.` 區隔即可，如下範例：
-
-```php
-$users = \M\User::all(['pre' => 'articles.comments']);
-foreach ($users as $user) {
-  echo $user->name;
-
-  foreach ($user->articles as $article) {
-    echo $article->title;
-
-    foreach ($article->comments as $comment) {
-      echo $comment->content;
-    }
-  }
-
-  // 依序會印出
-  // "OA"
-  // "文章 1"、"留言 3"、"留言 4"
-  // "文章 3"、"留言 5"
-  // "文章 4"
-
-  // "OB"
-  // "文章 2"、"留言 1"、"留言 2"
-  
-  // "OC"
-}
-```
-
-將 `Query Log` 調閱出來，可以看到分別執行了幾次 Query：
-
-```sql
-RAW：SELECT * FROM `User`
-VAL：[]
-
-RAW：SELECT * FROM `Article` WHERE `userId` IN (?,?,?)
-VAL：[1,2,3]
-
-RAW：SELECT * FROM `Comment` WHERE `articleId` IN (?,?,?,?)
-VAL：[1,2,3,4]
-```
-
-由 `Query Log` 可以看到一共是 3 個 Query。
+而 `relation` 就是在系統層面就幫你處理完這些複雜的分類問題了。
