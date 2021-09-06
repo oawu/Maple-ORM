@@ -18,6 +18,7 @@
 
 ## 文件
 文件可以參考 [Gitbook 文件](https://oawu.gitbook.io/maple-orm/)，或者以下 Guide
+
 * [初始設定](Guide/00_config.md)
 * [新增資料](Guide/01_create.md)
 * [查詢資料](Guide/02_select.md)
@@ -25,5 +26,5 @@
 * [刪除資料](Guide/04_delete.md)
 * [交易事件](Guide/05_transaction.md)
 * [關聯資料](Guide/06_relation.md)
-* [預先關聯](Guide/07_pre-relation.md)
+* [預先關聯](Guide/07_relation.md)
 * [綁定檔案](Guide/08_uploader.md)

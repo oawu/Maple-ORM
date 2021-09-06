@@ -5,11 +5,6 @@ namespace Thumbnail {
   abstract class Core {
     private static $extensions = ['jpg' => ['image/jpeg', 'image/pjpeg'], 'gif' => ['image/gif'], 'png' => ['image/png', 'image/x-png'], 'ico' => ['image/x-icon'], 'jpeg' => ['image/jpeg', 'image/pjpeg'], 'jpe' => ['image/jpeg', 'image/pjpeg'], 'bmp' => ['image/bmp', 'image/x-windows-bmp'], 'svg' => ['image/svg+xml']];
 
-    protected static function log() {
-      // call_user_func_array('Log::thumbnail', func_get_args());
-      return $this;
-    }
-
     protected static function error($message) {
       throw new \Exception($message);
     }
@@ -58,6 +53,7 @@ namespace Thumbnail {
     protected $format = null;
     protected $image = null;
     protected $dimension = null;
+    protected $logger = null;
 
     public function __construct($filePath) {
       is_file($filePath)
@@ -90,6 +86,14 @@ namespace Thumbnail {
 
     abstract protected function allows();
 
+    public function logger($func) {
+      $this->logger = $func;
+      return $this;
+    }
+    public function log(...$args) {
+      $logger = $this->logger; $logger && $logger(...$args);
+      return $this;
+    }
     public function getImage() {
       return $this->image;
     }
@@ -159,7 +163,6 @@ namespace Thumbnail {
 
     public function __construct($fileName, $options = []) {
       parent::__construct($fileName);
-
       $this->options = array_merge($this->options, array_intersect_key($options, $this->options));
     }
 
@@ -217,7 +220,6 @@ namespace Thumbnail {
 
     public function save($filename) {
       imageinterlace($this->image, $this->options['interlace'] ? 1 : 0);
-
       switch ($this->format) {
         case 'jpg': return @imagejpeg($this->image, $filename, $this->options['jpegQuality']);
         case 'gif': return @imagegif($this->image, $filename);
@@ -232,18 +234,14 @@ namespace Thumbnail {
     }
 
     public function pad($width, $height, $color = [255, 255, 255]) {
-      if ($width <= 0 || $height <= 0) {
-        static::log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
-        return $this;
-      }
+      if ($width <= 0 || $height <= 0)
+        return $this->log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
 
       if ($width == $this->dimension[0] && $height == $this->dimension[1])
         return $this;
 
-      if (!self::verifyColor($color)) {
-        static::log('色碼格式錯誤，目前只支援字串 HEX、RGB 陣列格式！', '色碼：' . (is_string($color) ? $color : json_encode($color)));
-        return $this;
-      }
+      if (!self::verifyColor($color))
+        return $this->log('色碼格式錯誤，目前只支援字串 HEX、RGB 陣列格式！', '色碼：' . (is_string($color) ? $color : json_encode($color)));
         
       if ($width < $this->dimension[0] || $height < $this->dimension[1])
         $this->resize($width, $height);
@@ -266,10 +264,8 @@ namespace Thumbnail {
     }
 
     public function resize($width, $height, $method = 'auto') {
-      if ($width <= 0 || $height <= 0) {
-        static::log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
-        return $this;
-      }
+      if ($width <= 0 || $height <= 0)
+        return $this->log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
         
       if ($width == $this->dimension[0] && $height == $this->dimension[1])
         return $this;
@@ -298,15 +294,12 @@ namespace Thumbnail {
     }
 
     public function adaptiveResizePercent($width, $height, $percent) {
-      if ($width <= 0 || $height <= 0) {
-        static::log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
-        return $this;
-      }
+      if ($width <= 0 || $height <= 0)
+        return $this->log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
 
-      if ($percent < 0 || $percent > 100) {
-        static::log('百分比例錯誤！', '百分比要在 0 ~ 100 之間！', '百分比：' . $percent);
-        return $this;
-      }
+      if ($percent < 0 || $percent > 100)console.error();
+      
+        return $this->log('百分比例錯誤！', '百分比要在 0 ~ 100 之間！', '百分比：' . $percent);
       
 
       if ($width == $this->dimension[0] && $height == $this->dimension[1])
@@ -335,10 +328,8 @@ namespace Thumbnail {
     }
 
     public function resizePercent($percent = 0) {
-      if ($percent < 1) {
-        static::log('縮圖比例錯誤！', '百分比要大於 1', '百分比：' . $percent);
-        return $this;
-      }
+      if ($percent < 1)
+        return $this->log('縮圖比例錯誤！', '百分比要大於 1', '百分比：' . $percent);
 
       if ($percent == 100)
         return $this;
@@ -348,15 +339,11 @@ namespace Thumbnail {
     }
 
     public function crop($startX, $startY, $width, $height) {
-      if ($width <= 0 || $height <= 0) {
-        static::log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
-        return $this;
-      }
+      if ($width <= 0 || $height <= 0)
+        return $this->log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
 
-      if ($startX < 0 || $startY < 0) {
-        static::log('起始點錯誤！', '水平、垂直的起始點一定要大於 0', '水平點：' . $startX, '垂直點：' . $startY);
-        return $this;
-      }
+      if ($startX < 0 || $startY < 0)
+        return $this->log('起始點錯誤！', '水平、垂直的起始點一定要大於 0', '水平點：' . $startX, '垂直點：' . $startY);
 
       if ($startX == 0 && $startY == 0 && $width == $this->dimension[0] && $height == $this->dimension[1])
         return $this;
@@ -373,10 +360,8 @@ namespace Thumbnail {
     }
 
     public function cropCenter($width, $height) {
-      if ($width <= 0 || $height <= 0) {
-        static::log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
-        return $this;
-      }
+      if ($width <= 0 || $height <= 0)
+        return $this->log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
 
       if ($width == $this->dimension[0] && $height == $this->dimension[1])
         return $this;
@@ -394,15 +379,11 @@ namespace Thumbnail {
     }
 
     public function rotate($degree, $color = [255, 255, 255]) {
-      if (!function_exists('imagerotate')) {
-        static::log('沒有載入 imagerotate 函式！');
-        return $this;
-      }
+      if (!function_exists('imagerotate'))
+        return $this->log('沒有載入 imagerotate 函式！');
 
-      if (!self::verifyColor($color)) {
-        static::log('色碼格式錯誤，目前只支援字串 HEX、RGB 陣列格式！', '色碼：' . (is_string($color) ? $color : json_encode($color)));
-        return $this;
-      }
+      if (!self::verifyColor($color))
+        return $this->log('色碼格式錯誤，目前只支援字串 HEX、RGB 陣列格式！', '色碼：' . (is_string($color) ? $color : json_encode($color)));
 
       if (!($degree % 360))
         return $this;
@@ -414,10 +395,8 @@ namespace Thumbnail {
     }
 
     public function adaptiveResizeQuadrant($width, $height, $item = 'c') {
-      if ($width <= 0 || $height <= 0) {
-        static::log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
-        return $this;
-      }
+      if ($width <= 0 || $height <= 0)
+        return $this->log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
 
       if ($width == $this->dimension[0] && $height == $this->dimension[1])
         return $this;
@@ -680,10 +659,8 @@ namespace Thumbnail {
     }
 
     public function pad($width, $height, $color = 'transparent') {
-      if ($width <= 0 || $height <= 0) {
-        static::log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
-        return $this;
-      }
+      if ($width <= 0 || $height <= 0)
+        return $this->log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
 
       if ($width == $this->dimension[0] && $height == $this->dimension[1])
         return $this;
@@ -730,10 +707,8 @@ namespace Thumbnail {
     }
 
     public function resize($width, $height, $method = 'auto') {
-      if ($width <= 0 || $height <= 0) {
-        static::log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
-        return $this;
-      }
+      if ($width <= 0 || $height <= 0)
+        return $this->log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
 
       if ($width == $this->dimension[0] && $height == $this->dimension[1])
         return $this;
@@ -761,15 +736,11 @@ namespace Thumbnail {
     }
 
     public function adaptiveResizePercent($width, $height, $percent) {
-      if ($width <= 0 || $height <= 0) {
-        static::log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
-        return $this;
-      }
+      if ($width <= 0 || $height <= 0)
+        return $this->log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
 
-      if ($percent < 0 || $percent > 100) {
-        static::log('百分比例錯誤！', '百分比要在 0 ~ 100 之間！', '百分比：' . $percent);
-        return $this;
-      }
+      if ($percent < 0 || $percent > 100)
+        return $this->log('百分比例錯誤！', '百分比要在 0 ~ 100 之間！', '百分比：' . $percent);
 
       if ($width == $this->dimension[0] && $height == $this->dimension[1])
         return $this;
@@ -795,10 +766,8 @@ namespace Thumbnail {
     }
 
     public function resizePercent($percent = 0) {
-      if ($percent < 1) {
-        static::log('縮圖比例錯誤！', '百分比要大於 1', '百分比：' . $percent);
-        return $this;
-      }
+      if ($percent < 1)
+        return $this->log('縮圖比例錯誤！', '百分比要大於 1', '百分比：' . $percent);
 
       if ($percent == 100)
         return $this;
@@ -808,15 +777,11 @@ namespace Thumbnail {
     }
 
     public function crop($startX, $startY, $width, $height) {
-      if ($width <= 0 || $height <= 0) {
-        static::log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
-        return $this;
-      }
+      if ($width <= 0 || $height <= 0)
+        return $this->log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
 
-      if ($startX < 0 || $startY < 0) {
-        static::log('起始點錯誤！', '水平、垂直的起始點一定要大於 0', '水平點：' . $startX, '垂直點：' . $startY);
-        return $this;
-      }
+      if ($startX < 0 || $startY < 0)
+        return $this->log('起始點錯誤！', '水平、垂直的起始點一定要大於 0', '水平點：' . $startX, '垂直點：' . $startY);
 
       if ($startX == 0 && $startY == 0 && $width == $this->dimension[0] && $height == $this->dimension[1])
         return $this;
@@ -832,10 +797,8 @@ namespace Thumbnail {
     }
 
     public function cropCenter($width, $height) {
-      if ($width <= 0 || $height <= 0) {
-        static::log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
-        return $this;
-      }
+      if ($width <= 0 || $height <= 0)
+        return $this->log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
 
       if ($width == $this->dimension[0] && $height == $this->dimension[1])
         return $this;
@@ -861,10 +824,8 @@ namespace Thumbnail {
     }
 
     public function adaptiveResizeQuadrant($width, $height, $item = 'c') {
-      if ($width <= 0 || $height <= 0) {
-        static::log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
-        return $this;
-      }
+      if ($width <= 0 || $height <= 0)
+        return $this->log('新尺寸錯誤！', '尺寸寬高一定要大於 0', '寬：' . $width, '高：' . $height);
 
       if ($width == $this->dimension[0] && $height == $this->dimension[1])
         return $this;
@@ -969,10 +930,8 @@ namespace Thumbnail {
                 Imagick::CHANNEL_ALPHA,     Imagick::CHANNEL_OPACITY, Imagick::CHANNEL_BLACK,
                 Imagick::CHANNEL_INDEX,     Imagick::CHANNEL_ALL,     Imagick::CHANNEL_DEFAULT];
 
-      if (!in_array($channel, $items)) {
-        static::log('參數錯誤！', '參數 Channel 格式不正確！', 'Channel：' . $channel);
-        return $this;
-      }
+      if (!in_array($channel, $items))
+        return $this->log('參數錯誤！', '參數 Channel 格式不正確！', 'Channel：' . $channel);
 
       $workingImage = $this->_machiningImageFilter($radius, $sigma, $channel);
 
@@ -1008,10 +967,8 @@ namespace Thumbnail {
     }
 
     public function getAnalysisDatas($limit = 10) {
-      if ($limit <= 0) {
-        static::log('參數錯誤！', '分析數量一定要大於 0', '分析數量：' . $limit);
+      if ($limit <= 0 && $this->log('參數錯誤！', '分析數量一定要大於 0', '分析數量：' . $limit))
         return [];
-      }
 
       $temp = clone $this->image;
 
@@ -1033,33 +990,23 @@ namespace Thumbnail {
     }
 
     public function saveAnalysisChart($file, $font, $limit = 10, $fontSize = 14, $adjoin = true) {
-      if (!$file) {
-        static::log('錯誤的儲存路徑！', '儲存路徑：' . $file);
-        return $this;
-      }
+      if (!$file)
+        return $this->log('錯誤的儲存路徑！', '儲存路徑：' . $file);
 
-      if (!is_readable($font)) {
-        static::log('參數錯誤！', '字型檔案不存在或不可讀！', '字型：' . $font);
-        return $this;
-      }
+      if (!is_readable($font))
+        return $this->log('參數錯誤！', '字型檔案不存在或不可讀！', '字型：' . $font);
 
-      $limit > 0 || static::log('參數錯誤！', '分析數量一定要大於 0', '分析數量：' . $limit);
+      $limit > 0 || $this->log('參數錯誤！', '分析數量一定要大於 0', '分析數量：' . $limit);
 
-      if ($fontSize <= 0) {
-        static::log('參數錯誤！', '字體大小一定要大於 0', '字體大小：' . $fontSize);
-        return $this;
-      }
+      if ($fontSize <= 0)
+        return $this->log('參數錯誤！', '字體大小一定要大於 0', '字體大小：' . $fontSize);
 
       $format = pathinfo($file, PATHINFO_EXTENSION);
-      if (!$format || !in_array($format, self::allows())) {
-        static::log('不支援此檔案格式！', '格式：' . $format);
-        return $this;
-      }
+      if (!$format || !in_array($format, self::allows()))
+        return $this->log('不支援此檔案格式！', '格式：' . $format);
 
-      if (!$datas = $this->getAnalysisDatas($limit)) {
-        static::log('圖像分析錯誤！');
-        return $this;
-      }
+      if (!$datas = $this->getAnalysisDatas($limit))
+        return $this->log('圖像分析錯誤！');
 
       $newImage = new Imagick();
 
@@ -1086,37 +1033,25 @@ namespace Thumbnail {
     }
 
     public function addFont($text, $font, $startX = 0, $startY = 12, $color = 'black', $fontSize = 12, $alpha = 1, $degree = 0) {
-      if ($text === '') {
-        static::log('沒有文字！', '內容：' . $text);
-        return $this;
-      }
+      if ($text === '')
+        return $this->log('沒有文字！', '內容：' . $text);
 
-      if (!is_readable($font)) {
-        static::log('參數錯誤！', '字型檔案不存在或不可讀！', '字型：' . $font);
-        return $this;
-      }
+      if (!is_readable($font))
+        return $this->log('參數錯誤！', '字型檔案不存在或不可讀！', '字型：' . $font);
 
-      if ($startX < 0 || $startY < 0) {
-        static::log('起始點錯誤！', '水平、垂直的起始點一定要大於 0', '水平點：' . $startX, '垂直點：' . $startY);
-        return $this;
-      }
+      if ($startX < 0 || $startY < 0)
+        return $this->log('起始點錯誤！', '水平、垂直的起始點一定要大於 0', '水平點：' . $startX, '垂直點：' . $startY);
 
-      if ($fontSize <= 0) {
-        static::log('參數錯誤！', '字體大小一定要大於 0', '字體大小：' . $fontSize);
-        return $this;
-      }
+      if ($fontSize <= 0)
+        return $this->log('參數錯誤！', '字體大小一定要大於 0', '字體大小：' . $fontSize);
       
-      if ($alpha < 0 || $alpha > 1) {
-        static::log('參數錯誤！', '參數 Alpha 一定要是 0 ~ 1', 'Alpha：' . $alpha);
-        return $this;
-      }
+      if ($alpha < 0 || $alpha > 1)
+        return $this->log('參數錯誤！', '參數 Alpha 一定要是 0 ~ 1', 'Alpha：' . $alpha);
 
       $degree = $degree % 360;
 
-      if (!$draw = $this->_createFont($font, $fontSize, $color, $alpha)) {
-        static::log('產生文字物件失敗！');
-        return $this;
-      }
+      if (!$draw = $this->_createFont($font, $fontSize, $color, $alpha))
+        return $this->log('產生文字物件失敗！');
 
       if ($this->format == 'gif') {
         $newImage = new Imagick();

@@ -45,7 +45,7 @@ if ($user) {
 ```
 
 ## 多筆新增
-全部皆新增成功則回傳 **true**，只要有一筆失敗則回傳 **false**，下面例子雖然新增了兩筆資料，但其實只下了一次 Query
+全部皆新增成功則回傳 **數量**，只要有一筆失敗則回傳 **null**，下面例子雖然新增了兩筆資料，但其實只下了一次 Query
 
 ```php
 $datas = [];
@@ -58,12 +58,12 @@ array_push($datas, [
   'age' => 28,
 ]);
 
-$result = \M\User::creates($datas);
-
-echo $result ? '新增成功' : '新增失敗';
+$count = \M\User::creates($datas);
+echo $count ? '成功新增' . $count . '筆資料' : '新增失敗';
 ```
 
 如果資料太多，想要分批新增，可以在**第二參數**決定多少筆數為一批，下列範例是以每 10筆為一批去執行，以下面例子共有 26 筆資料，若採用 10筆分批，則會 **下 3 次 Query**
+成功即回傳 **筆數**，失敗則 **null**。
 
 ```php
 $datas = [
@@ -74,9 +74,8 @@ $datas = [
   ['name' => 'OZ', 'age' => 26],
 ];
 
-$result = \M\User::creates($datas, 10);
-
-echo $result ? '新增成功' : '新增失敗';
+$count = \M\User::creates($datas, 10);
+echo $count !== null ? '成功新增' . $count . '筆資料' : '新增失敗';
 ```
 
 ## 新增之後

@@ -29,11 +29,11 @@ class User extends Model {}
 ```
 
 ## 單筆刪除
-Model 物件可使用 `delete` method 將該筆資訊從資料庫刪除，刪除成功則回傳 **true**，失敗則回傳 **false**。
+Model 物件可使用 `delete` 或 `remove` method 將該筆資訊從資料庫刪除，刪除成功則回傳 **true**，失敗則回傳 **false**。
 
 ```php
 $user = \M\User::one(2);
-$result = $user->delete();
+$result = $user->delete(); // $user->remove();
 
 echo $result ? '刪除成功' : '刪除失敗';
 
@@ -42,22 +42,12 @@ echo $user ? '未刪除' : '已經成功刪除'; // 已經成功刪除
 ```
 
 ## 多筆刪除
-有兩種方式，可採用 `deleteAll` 或者 `where 優先` 的方式來完成多筆刪除，成功即回傳 **true**，失敗則 **false**，通常會以 `where 優先` 的方式為主要寫法。
-
-* deleteAll 方式，第一參數開始即為條件。
-* where 優先，則是先下好 where 條件後，在 delete 符合條件的資料。
+有兩種方式，可採用 `static delete` 的方式來完成多筆刪除，成功即回傳 **筆數**，失敗則 **null**。
 
 ```php
 // deleteAll 的方式
-$result = \M\User::deleteAll('id > ?', 1);
-echo $result ? '刪除成功' : '刪除失敗';
-
-$total = \M\User::count(); // 取得所有數量
-echo $total; // 1
-
-// where 優先的方式
-$result = \M\User::where('id > ?', 1)->delete();
-echo $result ? '刪除成功' : '刪除失敗';
+$count = \M\User::where('id', '>', 1)->delete();
+echo $count ? '成功刪除' . $count . '筆資料' : '刪除失敗';
 
 $total = \M\User::count(); // 取得所有數量
 echo $total; // 1

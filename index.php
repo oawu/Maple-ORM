@@ -16,29 +16,20 @@ include PATH . 'Config.php';
 // 載入 縮圖軟體
 include PATH . 'Thumbnail.php';
 
-// 測試 應用
-include PATH . 'Tests/0-methods-where.php';
+// Model::
+//   [where, whereIn, whereNotIn, whereBetween, select, order, group, having, limit, offset, keyBy, relation]
+//   [where, whereIn, whereNotIn, whereBetween, select, order, group, having, limit, offset, keyBy, relation, orWhere, orWhereIn, orWhereNotIn, orWhereBetween]*
+//   [one, first, last, all, count, update, delete]()
 
-// 測試 關聯
-include PATH . 'Tests/1-relation1.php';
+// Model::
+//   [create, creates, truncate, one, first, last, all, count, update, delete]()
 
-// 測試 底線命名 關聯
-include PATH . 'Tests/2-relation2.php';
+// include PATH . 'Test/1-create.php';
+// include PATH . 'Test/2-select.php';
+// include PATH . 'Test/3-update.php';
+// include PATH . 'Test/4-delete.php';
+include PATH . 'Test/5-relation.php';
+// include PATH . 'Test/6-transaction.php';
 
-// 測試 pre-relation
-include PATH . 'Tests/3-pre-relation.php';
-
-// 測試 uploader
-include PATH . 'Tests/4-uploader.php';
-
-// 測試 transaction
-include PATH . 'Tests/5-transaction.php';
-
-// // 測試 文件
-// include PATH . 'Tests/6-guide-crud.php';
-
-// // 測試 文件
-// include PATH . 'Tests/7-guide-relation.php';
-
-// // 測試 文件
-// include PATH . 'Tests/8-guide-pre-relation.php';
+// include PATH . 'Test/7-put-image.php';
+// include PATH . 'Test/8-put-file.php';
