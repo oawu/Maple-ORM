@@ -25,7 +25,7 @@ namespace M {
 
   function foreign($tableName, $foreign = null) {
     return $foreign === null
-      ? Model::case() == Model::CASE_SNAKE
+      ? Model::caseColumn() == Model::CASE_SNAKE
         ? (Inflect::singularize($tableName) . '_id')
         : (lcfirst($tableName) . 'Id')
       : $foreign;
@@ -211,6 +211,10 @@ namespace M {
     return array_shift($className);
   }
 
+  function toTabelSnake($str) {
+    return strtolower(preg_replace(['/([a-z\d])([A-Z])/', '/([^_])([A-Z][a-z])/'], '$1_$2', $str));
+  }
+
   function rollback($message = null) {
     throw new \Error($message ?? Model::$lastLog);
   }
@@ -247,8 +251,8 @@ namespace M {
     return ['不明原因錯誤！'];
   }
 
-
   function _relation($class) {
+    class_exists($class);
     $traces = array_filter(debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT), function($trace) { return isset($trace['class'], $trace['object']) && $trace['object'] instanceof Model; });
     if (!$trace = array_shift($traces)) throw new Error('Relation Many 綁定錯誤');
     return $trace;
@@ -289,7 +293,8 @@ namespace M {
     private static $errorFunc = null;
     private static $caches = [];
     private static $dirs   = null;
-    private static $case   = Model::CASE_CAMEL;
+    private static $caseTable = Model::CASE_CAMEL;
+    private static $caseColumn = Model::CASE_CAMEL;
 
     public static function config($key = '', $config = []) {
       return Connection::$configs[$key] = new Config($config);
@@ -331,12 +336,20 @@ namespace M {
       return $dirs !== null ? self::$dirs = $dirs : self::$dirs;
     }
 
-    public static function case($case = null) {
-      return $case !== null
-        ? self::$case = in_array($case, [Model::CASE_CAMEL, Model::CASE_SNAKE])
-          ? $case
-          : self::$case
-        : self::$case;
+    public static function caseTable($caseTable = null) {
+      return $caseTable !== null
+        ? self::$caseTable = in_array($caseTable, [Model::CASE_CAMEL, Model::CASE_SNAKE])
+          ? $caseTable
+          : self::$caseTable
+        : self::$caseTable;
+    }
+    
+    public static function caseColumn($caseColumn = null) {
+      return $caseColumn !== null
+        ? self::$caseColumn = in_array($caseColumn, [Model::CASE_CAMEL, Model::CASE_SNAKE])
+          ? $caseColumn
+          : self::$caseColumn
+        : self::$caseColumn;
     }
     
     public static function queryLogFunc($func) {
@@ -376,7 +389,7 @@ namespace M {
       return Uploader::func($func);
     }
 
-    public static function log($message) {
+    public static function writeLog($message) {
       self::$lastLog = $message;
       $logFunc = self::$logFunc; $logFunc && $logFunc(self::$lastLog);
       return false;
@@ -417,7 +430,7 @@ namespace M {
     public static function closeDB()            { return Connection::close(); }
     public static function truncate()           {
       $e = Connection::instance()->query(implode(' ', ['TRUNCATE', 'TABLE', quoteName(static::table()->name)]) . ';');
-      return $e ? Model::log('資料庫執行語法錯誤，錯誤原因：' . $e) ?: false : true;
+      return $e ? Model::writeLog('資料庫執行語法錯誤，錯誤原因：' . $e) ?: false : true;
     }
     public static function create($attrs = [], $allow = []) {
       $allow && $attrs = array_intersect_key($attrs, array_flip($allow));
@@ -425,7 +438,7 @@ namespace M {
       $class = static::class;
 
       try { $model = new $class(defaults(static::table(), $attrs), true); }
-      catch (Error $e) { return Model::log($e->getMessage()) ?: null; }
+      catch (Error $e) { return Model::writeLog($e->getMessage()) ?: null; }
 
       return $model;
     }
@@ -439,7 +452,7 @@ namespace M {
           return $tmps;
         }, $rows));
       } catch (Error $e) {
-        return Model::log($e->getMessage()) ?: null;
+        return Model::writeLog($e->getMessage()) ?: null;
       }
 
       if (!$rows)
@@ -449,7 +462,7 @@ namespace M {
       $len  = count($cols = array_flip(array_keys($rows[0])));
       foreach ($rows as $i => $row) {
         if ($len != count(array_intersect_key($row, $cols)))
-          return Model::log('結構錯誤，第 ' . ($i + 1) . '筆資料 key 結構與第一筆不同') ?: null;
+          return Model::writeLog('結構錯誤，第 ' . ($i + 1) . '筆資料 key 結構與第一筆不同') ?: null;
         array_push($pits, '(' . implode(', ', array_fill(0, $len, '?')) . ')');
         
         $tmps = [];
@@ -461,9 +474,9 @@ namespace M {
       $sth = null;
 
       if ($e = Connection::instance()->query('INSERT INTO ' . quoteName(static::table()->name) . ' (' . implode(', ', array_map(function($key) { return quoteName(static::table()->name) . '.' . quoteName($key); }, array_keys($rows[0]))) . ') VALUES ' . implode(', ', $pits) . ';', $vals, $sth))
-        return Model::log('新增資料庫錯誤，錯誤原因：' . $e) ?: null;
+        return Model::writeLog('新增資料庫錯誤，錯誤原因：' . $e) ?: null;
 
-      // $sth->rowCount() == count($rows) || Model::log('新增資料庫錯誤，錯誤原因：影響筆數為 1 筆，但應該為 ' . count($rows) . ' 筆');
+      // $sth->rowCount() == count($rows) || Model::writeLog('新增資料庫錯誤，錯誤原因：影響筆數為 1 筆，但應該為 ' . count($rows) . ' 筆');
 
       return $sth->rowCount();
     }
@@ -565,14 +578,14 @@ namespace M {
       $table = static::table();
 
       if (!$primaries = $this->_primaries())
-        return Model::log('更新資料失敗，錯誤原因：找不到 Primary Key') ?: null;
+        return Model::writeLog('更新資料失敗，錯誤原因：找不到 Primary Key') ?: null;
 
       if (!array_intersect_key($this->attrs, $this->dirties))
         return $this;
       
       if (isset($table->columns[static::$updateAt]) && array_key_exists(static::$updateAt, $this->attrs) && !array_key_exists(static::$updateAt, $this->dirties)) {
         try { $this->_updateAttr(static::$updateAt, \date(DateTime::formatByType($table->columns[static::$updateAt]['type']))); }
-        catch (Error $e) { return Model::log('更新資料失敗，錯誤原因：' . $e) ?: null; }
+        catch (Error $e) { return Model::writeLog('更新資料失敗，錯誤原因：' . $e) ?: null; }
       }
 
       $sets = $vals = $tmps = [];
@@ -590,7 +603,7 @@ namespace M {
       $sth = null;
 
       if ($e = Connection::instance()->query('UPDATE ' . quoteName($table->name) . ' SET ' . implode(', ', $sets) . ' WHERE ' . implode(' AND ', $tmps) . ';', $vals, $sth))
-        return Model::log('更新資料庫錯誤，錯誤原因：' . $e) ?: null;
+        return Model::writeLog('更新資料庫錯誤，錯誤原因：' . $e) ?: null;
 
       $count = $sth->rowCount();
 
@@ -609,7 +622,7 @@ namespace M {
     
     public function remove(&$count = 0) {
       if (!$primaries = $this->_primaries())
-        return Model::log('刪除資料失敗，錯誤原因：找不到 Primary Key');
+        return Model::writeLog('刪除資料失敗，錯誤原因：找不到 Primary Key');
 
       $table = static::table();
       
@@ -622,7 +635,7 @@ namespace M {
       $sth = null;
 
       if ($e = Connection::instance()->query('DELETE FROM ' . quoteName($table->name) . ' WHERE ' . implode(' AND ', $tmps) . ';', $vals, $sth))
-        return Model::log('移除資料庫錯誤，錯誤原因：' . $e);
+        return Model::writeLog('移除資料庫錯誤，錯誤原因：' . $e);
 
       $count = $sth->rowCount();
 
@@ -632,10 +645,10 @@ namespace M {
       $return = $this;
       foreach ($afterDeletes as $afterDelete) {
         if (!method_exists($this, $afterDelete))
-          return Model::log('Model「' . static::class . '」內沒有「' . $afterDelete . '」的 method');
+          return Model::writeLog('Model「' . static::class . '」內沒有「' . $afterDelete . '」的 method');
 
         if (!$return = $this->$afterDelete($return))
-          return Model::log('Model「' . static::class . '」執行「' . $afterDelete . '」after create 失敗');
+          return Model::writeLog('Model「' . static::class . '」執行「' . $afterDelete . '」after create 失敗');
       }
 
       return true;
@@ -691,6 +704,7 @@ namespace M\Core {
   use function \M\attrsToStrings;
   use function \M\quoteName;
   use function \M\deNamespace;
+  use function \M\toTabelSnake;
   use function \M\columnFormat;
   use function \M\defaults;
   use function \M\columnInit;
@@ -864,10 +878,10 @@ namespace M\Core {
       $sth = null;
       $objs = [];
 
-      if ($e = Connection::instance()->query($this->sql, $this->values, $sth)) return Model::log('查詢資料庫錯誤，錯誤原因：' . $e) ?: ($isSingular ? null : []);
+      if ($e = Connection::instance()->query($this->sql, $this->values, $sth)) return Model::writeLog('查詢資料庫錯誤，錯誤原因：' . $e) ?: ($isSingular ? null : []);
       
       try { $objs = array_map(function($row) { return new $this->class($row, false); }, $sth->fetchAll()); }
-      catch (Error $e) { return Model::log('實體 Model 時發生錯誤，錯誤原因：' . $e) ?: ($isSingular ? null : []); }
+      catch (Error $e) { return Model::writeLog('實體 Model 時發生錯誤，錯誤原因：' . $e) ?: ($isSingular ? null : []); }
 
       if (!$objs) return $isSingular ? null : [];
 
@@ -919,7 +933,7 @@ namespace M\Core {
     private function _execute() {
       $sth = null;
       $e = Connection::instance()->query($this->sql, $this->values, $sth);
-      return $e ? Model::log('資料庫執行語法錯誤，錯誤原因：' . $e) ?: null : $sth->rowCount();
+      return $e ? Model::writeLog('資料庫執行語法錯誤，錯誤原因：' . $e) ?: null : $sth->rowCount();
     }
 
     public function resetWhere() {
@@ -1031,7 +1045,7 @@ namespace M\Core {
       $sth = null;
 
       if ($e = Connection::instance()->query($this->sql, $this->values, $sth))
-        return Model::log('查詢資料庫錯誤，錯誤原因：' . $e) ?: 0;
+        return Model::writeLog('查詢資料庫錯誤，錯誤原因：' . $e) ?: 0;
 
       if (!$objs = array_map(function($row) { return $row; }, $sth->fetchAll()))
         return 0;
@@ -1044,12 +1058,12 @@ namespace M\Core {
 
       $sets = [];
       try { $defaults = defaults($this->table, $attrs, false); }
-      catch (Error $e) { return Model::log($e->getMessage()) ?: null; }
+      catch (Error $e) { return Model::writeLog($e->getMessage()) ?: null; }
       
       try {
         foreach ($defaults as $name => $value)
           $sets[$name] = columnInit($this->table->columns[$name], $value, $this->table->plugins[$name] ?? null);
-      } catch (Error $e) { return Model::log($e->getMessage()) ?: null; }
+      } catch (Error $e) { return Model::writeLog($e->getMessage()) ?: null; }
 
       if (array_key_exists($this->table->class::$createAt, $sets))
         unset($sets[$this->table->class::$createAt]);
@@ -1081,6 +1095,7 @@ namespace M\Core {
     public $primaries = [];
     public $plugins   = [];
     private $className = '';
+    private $cacheName = null;
 
     private function __construct($className) {
       $this->className = $className;
@@ -1088,7 +1103,19 @@ namespace M\Core {
     }
 
     public function __get($name) {
-      if ($name == 'name') { $className = $this->className; return $className::$tableName ?? deNamespace($className); }
+      if ($name == 'name') {
+        if (isset($this->cacheName))
+          return $this->cacheName;
+
+        $className = $this->className;
+        
+        if (isset($className::$tableName))
+          return $this->cacheName = $className::$tableName;
+
+        return $this->cacheName = Model::caseTable() == Model::CASE_SNAKE
+          ? toTabelSnake(deNamespace($className))
+          : deNamespace($className);
+      }
       if ($name == 'class') return $this->className;
       return null;
     }
@@ -1117,7 +1144,13 @@ namespace M\Core {
 
     private function _setPrimaries() {
       $className = $this->className;
-      $this->primaries = isset($className::$primaries) ? is_array($className::$primaries) ? $className::$primaries : [$className::$primaries] : array_values(array_column(array_filter($this->columns, function($column) { return $column['primary']; }), 'field'));
+      $this->primaries = isset($className::$primaries)
+        ? is_array($className::$primaries)
+          ? $className::$primaries
+          : [$className::$primaries]
+        : array_values(array_column(array_filter($this->columns, function($column) {
+          return $column['primary'];
+        }), 'field'));
       return $this;
     }
   }
@@ -1519,9 +1552,9 @@ namespace M\Core\Plugin {
         return false;
 
       if (!$this->driver->put($tmpPath, $path = implode(DIRECTORY_SEPARATOR, array_merge($this->dirs(), [$name]))))
-        return Model::log('搬移至指定目錄時發生錯誤，tmpPath：' . $tmpPath . '，path：' . $path);
+        return Model::writeLog('搬移至指定目錄時發生錯誤，tmpPath：' . $tmpPath . '，path：' . $path);
 
-      @unlink($tmpPath) || Model::log('移除舊資料錯誤');
+      @unlink($tmpPath) || Model::writeLog('移除舊資料錯誤');
 
       $this->model->{$this->column} = $name;
 
@@ -1539,7 +1572,7 @@ namespace M\Core\Plugin {
         return false;
 
       if (!$this->driver->saveAs($path = implode(DIRECTORY_SEPARATOR, array_merge($this->dirs(), [$key . $this->value])), $source))
-        return Model::log('下載時發生錯誤，path：' . $path);
+        return Model::writeLog('下載時發生錯誤，path：' . $path);
 
       return true;
     }
@@ -1560,10 +1593,10 @@ namespace M\Core\Plugin {
 
     protected function checkSetting() {
       if (!($this->column && $this->model))
-        return Model::log('未設定 Model 與 Column');
+        return Model::writeLog('未設定 Model 與 Column');
 
       if (!$this->driver)
-        return Model::log('取得 Save Driver 物件失敗');
+        return Model::writeLog('取得 Save Driver 物件失敗');
       
       return true;
     }
@@ -1586,7 +1619,7 @@ namespace M\Core\Plugin {
       curl_close($curl);
 
       if ($error || $message)
-        return Model::log('無法取得圖片，網址：' . $url) ?: '';
+        return Model::writeLog('無法取得圖片，網址：' . $url) ?: '';
 
       $write = fopen($file = $this->tmpDir . static::randomName() . ($format ? '.' . $format : ''), 'w');
       fwrite($write, $data);
@@ -1599,17 +1632,17 @@ namespace M\Core\Plugin {
     protected function putFileCheck(&$file) {
       if (is_string($file)) {
         if (!(($file = $this->download($file)) && file_exists($file)))
-          return Model::log('檔案格式有誤(1)') ?: [];
+          return Model::writeLog('檔案格式有誤(1)') ?: [];
         
         $file = ['name' => basename($file), 'tmp_name' => $file, 'type' => '', 'error' => '', 'size' => filesize($file)];
       }
 
       if (!is_array($file))
-        return Model::log('檔案格式有誤(3)，缺少 key：' . $key) ?: [];
+        return Model::writeLog('檔案格式有誤(3)，缺少 key：' . $key) ?: [];
 
       foreach (['name', 'tmp_name', 'type', 'error', 'size'] as $key)
         if (!array_key_exists($key, $file))
-          return Model::log('檔案格式有誤(2)，缺少 key：' . $key) ?: [];
+          return Model::writeLog('檔案格式有誤(2)，缺少 key：' . $key) ?: [];
 
       $pathinfo     = pathinfo($file['name']);
       $file['name'] = preg_replace("/[^a-zA-Z0-9\\._-]/", "", $file['name']);
@@ -1620,7 +1653,7 @@ namespace M\Core\Plugin {
         return [];
 
       if (!$this->moveOriFile($file, $format, $tmp))
-        return Model::log('搬移至暫存目錄時發生錯誤') ?: [];
+        return Model::writeLog('搬移至暫存目錄時發生錯誤') ?: [];
 
       return [
         'name' => $file['name'],
@@ -1632,7 +1665,7 @@ namespace M\Core\Plugin {
     protected function clear($key = '') {
       return $this->driver->delete($path = implode(DIRECTORY_SEPARATOR, array_merge($this->dirs(), [$key . $this->value])))
         ? true
-        : Model::log('移除時發生錯誤，path：' . $path);
+        : Model::writeLog('移除時發生錯誤，path：' . $path);
     }
   }
 }
@@ -1727,7 +1760,7 @@ namespace M\Core\Plugin\Uploader {
 
       try {
         $image = $thumbnail($tmpPath);
-        $image->logger(function(...$args) { Model::log(...$args); });
+        $image->logger(function(...$args) { Model::writeLog(...$args); });
 
         $image->rotate($orientation);
         $name = static::randomName() . (static::AUTO_FORMAT ? $format ?? ('.' . $image->getFormat()) : '');
@@ -1737,7 +1770,7 @@ namespace M\Core\Plugin\Uploader {
           $newPath = $this->tmpDir . $version;
 
           if (!$this->_build(clone $image, $newPath, $params))
-            return Model::log('圖像處理失敗，儲存路徑：' . $newPath . '，版本：' . $key);
+            return Model::writeLog('圖像處理失敗，儲存路徑：' . $newPath . '，版本：' . $key);
 
           array_push($news, [
             'name' => $version,
@@ -1754,20 +1787,20 @@ namespace M\Core\Plugin\Uploader {
         ]);
 
       } catch (\Exception $e) {
-        return Model::log('圖像處理，發生意外錯誤，錯誤訊息：' . $e->getMessage());
+        return Model::writeLog('圖像處理，發生意外錯誤，錯誤訊息：' . $e->getMessage());
       }
 
       if (count($news) != count($versions) + 1)
-        return Model::log('縮圖未完成，有些圖片未完成縮圖，成功數量：' . count($news) . '，版本數量：' . count($versions));
+        return Model::writeLog('縮圖未完成，有些圖片未完成縮圖，成功數量：' . count($news) . '，版本數量：' . count($versions));
 
       foreach ($news as $data) {
         if (!$this->driver->put($data['path'], $path = implode(DIRECTORY_SEPARATOR, array_merge($this->dirs(), [$data['name']]))))
-          return Model::log('搬移至指定目錄時發生錯誤，tmpPath：' . $tmpPath . 'path：' . $path);
+          return Model::writeLog('搬移至指定目錄時發生錯誤，tmpPath：' . $tmpPath . 'path：' . $path);
         
-        @unlink($data['path']) || Model::log('移除舊資料錯誤，path：' . $new['path']);
+        @unlink($data['path']) || Model::writeLog('移除舊資料錯誤，path：' . $new['path']);
       }
 
-      @unlink($tmpPath) || Model::log('移除舊資料錯誤');
+      @unlink($tmpPath) || Model::writeLog('移除舊資料錯誤');
 
       $this->model->{$this->column} = $name;
 
@@ -1807,10 +1840,10 @@ namespace M\Core\Plugin\Uploader {
         return $image->save($file, true);
 
       if (!$method = array_shift($params))
-        return Model::log('縮圖函式方法錯誤');
+        return Model::writeLog('縮圖函式方法錯誤');
 
       if (!method_exists($image, $method))
-        return Model::log('縮圖函式沒有此方法，縮圖函式：' . $method);
+        return Model::writeLog('縮圖函式沒有此方法，縮圖函式：' . $method);
 
       call_user_func_array([$image, $method], array_shift($params));
       return $image->save($file, true);
