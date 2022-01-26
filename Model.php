@@ -779,6 +779,9 @@ namespace M\Core {
       if ($length == 2) { // where('id', 1), where('id', [1])
         $column = array_shift($args);
         $value  = array_shift($args);
+
+        if ($value === null)
+          return [quoteName($this->table->name) . '.' . quoteName($column) . ' IS NULL'];
         
         if (is_array($value))
           if ($value = array_unique($value))
@@ -796,6 +799,9 @@ namespace M\Core {
 
         if (strtolower(trim($key)) == 'between')
           return count($value) >= 2 ? array_merge([quoteName($this->table->name) . '.' . quoteName($column) . ' BETWEEN ? AND ?'], $value) : null;
+
+        if ($value === null)
+          return [quoteName($this->table->name) . '.' . quoteName($column) . ' ' . $key . ' NULL'];
 
         if (is_array($value))
           if ($value = array_unique($value))
