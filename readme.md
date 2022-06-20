@@ -2,7 +2,7 @@
 歡迎來到 Model ORM Model
 
 ## 說明
-* 這是 [Maple 8](https://github.com/comdan66/Maple) 所採用的 active record ORM
+* 這是 [Maple 8](https://github.com/oawu/Maple) 所採用的 active record ORM
 * 支援 PHP 7.0+
 * 支援 MySQL 5.6+
 * 支援 [駝峰命名法](https://en.wikipedia.org/wiki/Camel_case) 的資料庫
