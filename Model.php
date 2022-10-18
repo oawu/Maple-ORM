@@ -922,8 +922,7 @@ namespace M\Core {
           $key1 = $where['key1'];
           $key2 = $where['key2'];
 
-          // $relations = $build->resetWhere()->whereIn($key1, $vals)->keyBy($key1)->all();
-          $relations = $build->whereIn($key1, $vals)->keyBy($key1)->all();
+          $relations = $build->resetWhere()->whereIn($key1, $vals)->keyBy($key1)->all();
 
           foreach ($objs as $obj)
             if (method_exists($obj, $relation) && isset($obj->$key2)) {
