@@ -403,6 +403,8 @@ namespace M {
     public static function error(...$args)      { $errorFunc = self::$errorFunc; $errorFunc ? $errorFunc(...$args) : var_dump($args); exit(1); }
     public static function table()              { return Table::instance(static::class); }
     
+    public static function builder()            { return Builder::create(static::class); }
+
     public static function where(...$args)      { return Builder::create(static::class)->where(...$args); }
     public static function whereIn($key, $vals) { return Builder::create(static::class)->whereIn($key, $vals); }
     public static function in($key, $vals)      { return Builder::create(static::class)->whereIn($key, $vals); }
@@ -458,27 +460,39 @@ namespace M {
       if (!$rows)
         return 0;
 
-      $pits = $vals = [];
+      $j = 0;
+      $page = ['pits' => [], 'vals' => []];
+      $pages = [];
       $len  = count($cols = array_flip(array_keys($rows[0])));
+
       foreach ($rows as $i => $row) {
         if ($len != count(array_intersect_key($row, $cols)))
           return Model::writeLog('結構錯誤，第 ' . ($i + 1) . '筆資料 key 結構與第一筆不同') ?: null;
-        array_push($pits, '(' . implode(', ', array_fill(0, $len, '?')) . ')');
+
+        if (count($page['pits']) > $limit) {
+          array_push($pages, $page);
+          $page = ['pits' => [], 'vals' => []];
+        }
+
+        array_push($page['pits'], '(' . implode(', ', array_fill(0, $len, '?')) . ')');
         
         $tmps = [];
         foreach ($row as $key => $val)
           array_push($tmps, attrsToStrings($table->columns[$key]['type'], $val));
-        $vals = array_merge($vals, $tmps);
+        $page['vals'] = array_merge($page['vals'], $tmps);
       }
 
-      $sth = null;
+      $page['pits'] && array_push($pages, $page);
 
-      if ($e = Connection::instance()->query('INSERT INTO ' . quoteName(static::table()->name) . ' (' . implode(', ', array_map(function($key) { return quoteName(static::table()->name) . '.' . quoteName($key); }, array_keys($rows[0]))) . ') VALUES ' . implode(', ', $pits) . ';', $vals, $sth))
-        return Model::writeLog('新增資料庫錯誤，錯誤原因：' . $e) ?: null;
+      foreach ($pages as $page) {
+        $sth = null;
+        if ($e = Connection::instance()->query('INSERT INTO ' . quoteName(static::table()->name) . ' (' . implode(', ', array_map(function($key) { return quoteName(static::table()->name) . '.' . quoteName($key); }, array_keys($rows[0]))) . ') VALUES ' . implode(', ', $page['pits']) . ';', $page['vals'], $sth))
+          return Model::writeLog('新增資料庫錯誤，錯誤原因：' . $e) ?: null;
+      }
 
       // $sth->rowCount() == count($rows) || Model::writeLog('新增資料庫錯誤，錯誤原因：影響筆數為 1 筆，但應該為 ' . count($rows) . ' 筆');
-
-      return $sth->rowCount();
+      // $sth->rowCount()
+      return true;
     }
 
     public static function hasMany($class, $fk = null, $pk = 'id') { return _has($class, 'all', $fk, $pk); }
@@ -908,7 +922,8 @@ namespace M\Core {
           $key1 = $where['key1'];
           $key2 = $where['key2'];
 
-          $relations = $build->resetWhere()->whereIn($key1, $vals)->keyBy($key1)->all();
+          // $relations = $build->resetWhere()->whereIn($key1, $vals)->keyBy($key1)->all();
+          $relations = $build->whereIn($key1, $vals)->keyBy($key1)->all();
 
           foreach ($objs as $obj)
             if (method_exists($obj, $relation) && isset($obj->$key2)) {
@@ -1453,6 +1468,12 @@ namespace M\Core\Plugin {
     public function format($format = null, $default = null) {
       return $this->datetime
         ? $this->datetime->format($format === null ? $this->format : $format)
+        : $default;
+    }
+
+    public function unix($default = null) {
+      return $this->datetime
+        ? 0 + $this->datetime->format('U')
         : $default;
     }
 
