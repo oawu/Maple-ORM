@@ -122,7 +122,7 @@ namespace M {
     if (is_int($val)) return $val;
     if (is_numeric($val) && floor($val) != $val) return (int)$val;
     if (is_string($val) && is_float($val + 0)) return (string)$val;
-    if (is_float($val) && $val >= PHP_INTM\CoreAX) return number_format($val, 0, '', '');
+    if (is_float($val) && $val >= PHP_FLOAT_MAX) return number_format($val, 0, '', '');
     return (int)$val;
   }
 
@@ -190,7 +190,7 @@ namespace M {
       else if ($attr instanceof DateTime)
         $attrs[$key] = (string)$attr;
       else if (isset($obj->table()->columns[$key]) && in_array($obj->table()->columns[$key]['type'], ['tinyint', 'smallint', 'mediumint', 'int', 'bigint']))
-        $attrs[$key] = is_int($attr) ? $attr : (is_numeric($attr) && floor($attr) != $attr ? (int)$attr : (is_string($attr) && is_float($attr + 0) ? (string)$attr : (is_float($attr) && $attr >= PHP_INTM\CoreAX ? number_format($attr, 0, '', '') : (int)$attr)));
+        $attrs[$key] = is_int($attr) ? $attr : (is_numeric($attr) && floor($attr) != $attr ? (int)$attr : (is_string($attr) && is_float($attr + 0) ? (string)$attr : (is_float($attr) && $attr >= PHP_FLOAT_MAX ? number_format($attr, 0, '', '') : (int)$attr)));
       else if (isset($obj->table()->columns[$key]) && in_array($obj->table()->columns[$key]['type'], ['float', 'double', 'numeric', 'decimal', 'dec']))
         $attrs[$key] = (double)$attr;
       else if (isset($obj->table()->columns[$key]) && in_array($obj->table()->columns[$key]['type'], ['json']))
