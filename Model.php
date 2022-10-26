@@ -1471,9 +1471,12 @@ namespace M\Core\Plugin {
     }
 
     public function unix($default = null) {
-      return $this->datetime
-        ? 0 + $this->datetime->format('U')
-        : $default;
+      if ($this->datetime === null)
+        return $default;
+
+      return 0 + ($this->type == 'date'
+        ? strtotime($this->datetime->format('Y-m-d 00:00:00'))
+        : $this->datetime->format('U'));
     }
 
     public function SQL() {
