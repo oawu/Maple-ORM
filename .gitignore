@@ -1,4 +1,5 @@
 .DS_Store
 sftp-config*
 
-/Storage/*/
+/Storage/*
+/Tmp/*

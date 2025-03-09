@@ -8,7 +8,7 @@
 #### 格式
 | 欄位 | 格式  |
 |---|---|
-| id | INT | 
+| id | INT |
 | name | VARCHAR |
 | age | INT |
 
@@ -59,8 +59,8 @@ foreach ($users as $user) {
 
 ```
  Model::
-   [where, whereIn, whereNotIn, whereBetween, select, order, group, having, limit, offset, keyBy, relation]
-   [where, whereIn, whereNotIn, whereBetween, select, order, group, having, limit, offset, keyBy, relation, orWhere, orWhereIn, orWhereNotIn, orWhereBetween]*
+   [where, whereIn, whereNotIn, whereBetween, select, order, group, having, limit, offset, byKey, relation]
+   [where, whereIn, whereNotIn, whereBetween, select, order, group, having, limit, offset, byKey, relation, orWhere, orWhereIn, orWhereNotIn, orWhereBetween]*
    [one, first, last, all, count, update, delete]()
 
  Model::
@@ -68,7 +68,7 @@ foreach ($users as $user) {
 ```
 
 ```php
-$user = \M\User::where('age < ?', 20)->and('id > ?', 1)->one();
+$user = \M\User::where('age', '<', 20)->and('id', '>', 1)->one();
 echo $user->name; // OC
 ```
 
@@ -96,7 +96,7 @@ foreach ($users as $user) {
 ```
 
 ## 進階條件
-加入 `limit`、`offset` 
+加入 `limit`、`offset`
 
 ```php
 $user = \M\User::limit(11)->offset(1)->where('id', '>', 0)->one();
@@ -151,11 +151,11 @@ $users = \M\User::all();
 echo count($users); // 3
 echo $users[1]->name; // OB
 
-$users = \M\User::all('id IN (?)', [4, 5, 6]);
+$users = \M\User::all('id', [4, 5, 6]);
 echo count($users); // 0
 ```
 
-## keyBy
+## byKey
 由 `all` 的結果可以取得查詢後的 **Model 陣列**，但有時候我們希望藉由某個欄位做分類，如下面例子需要依據取得後的物件 `id` 做排序，正常寫法為：
 
 ```php
@@ -168,9 +168,9 @@ foreach ($users as $user) {
 var_dump($byIdUsers);
 ```
 
-可以使用 `keyBy` 函式也可以達到相同的效果。
+可以使用 `byKey` 函式也可以達到相同的效果。
 
 ```php
-$users = \M\User::keyBy('id')->all();
+$users = \M\User::byKey('id')->all();
 var_dump($users);
 ```

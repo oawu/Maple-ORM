@@ -5,7 +5,7 @@
 回傳結果若為 `null`、`false`、`0`、`[]`、`""`、`"0"`，皆為錯，所以會 rollback
 
 ```php
-$result = \M\transaction(function() {
+$result = \M\transaction('db', static function() {
   $user = \M\User::create([
     'name' => 'OA'
   ]);

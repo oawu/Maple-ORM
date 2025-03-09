@@ -40,13 +40,13 @@ namespace M;
 
 class User extends Model {
   public function articles() {
-    return hasMany(Article::class);
+    return $this->hasMany(Article::class);
   }
 }
 
 class Article extends Model {
   public function comments() {
-    return hasMany(Comment::class);
+    return $this->hasMany(Comment::class);
   }
 }
 
@@ -54,13 +54,14 @@ class Comment extends Model {}
 ```
 
 ## 預先關聯
+為了解決 `N + 1` 查詢問題。
 
 ### 理解
 使用關聯方式查詢資料庫會增加程式碼的整潔度與可讀性，但在某些情境上要特別注意，在使用**預先關聯**之前，可能需要先了解一下**關聯資料**的基礎原理。
 
 單筆 `User` 下取得其所有 `Article` 的例子而言，程式碼會下兩次 Query 跟資料庫索取資料。
 
-> 這部分可以用 `\M\Model::queryLogFunc` 開啟檢視 `Query Log`，詳細設定可以參考 [初始設定](00_config.md)。
+> 這部分可以用 `\M\Model::setQueryLogFunc` 開啟檢視 `Query Log`，詳細設定可以參考 [初始設定](00_config.md)。
 
 ```php
 $user = \M\User::one(1);

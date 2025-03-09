@@ -8,7 +8,7 @@
 #### 格式
 | 欄位 | 格式  |
 |---|---|
-| id | INT | 
+| id | INT |
 | name | VARCHAR |
 | age | INT |
 
@@ -29,7 +29,7 @@ class User extends Model {}
 ```
 
 ## 單筆刪除
-Model 物件可使用 `delete` 或 `remove` method 將該筆資訊從資料庫刪除，刪除成功則回傳 **true**，失敗則回傳 **false**。
+Model 物件可使用 `delete` method 將該筆資訊從資料庫刪除，刪除成功則回傳 **true**，失敗則回傳 **false**。
 
 ```php
 $user = \M\User::one(2);
@@ -42,11 +42,11 @@ echo $user ? '未刪除' : '已經成功刪除'; // 已經成功刪除
 ```
 
 ## 多筆刪除
-有兩種方式，可採用 `static delete` 的方式來完成多筆刪除，成功即回傳 **筆數**，失敗則 **null**。
+可採用 `deletes` 的方式來完成多筆刪除，成功即回傳 **筆數**，失敗則 **null**。
 
 ```php
 // deleteAll 的方式
-$count = \M\User::where('id', '>', 1)->delete();
+$count = \M\User::where('id', '>', 1)->deletes();
 echo $count ? '成功刪除' . $count . '筆資料' : '刪除失敗';
 
 $total = \M\User::count(); // 取得所有數量
@@ -59,6 +59,8 @@ echo $total; // 1
 如果每次刪除一筆 User 資料時，就要將其他資料也一並刪除，那就可以在 `afterDeletes` 內指定一個刪除完後需要做的 method，如果 `afterDeletes` 中若有一個回傳不是為 true，那此次刪除就會是失敗的，該 delete 即回傳 **false**。
 
 通常這類功能可以用在 **計數** 功能的欄位上。
+
+`afterDeletes` 不保證成功全跑完，失敗結束不影響新增。中間有一次斷掉後，後面的則不會做完。
 
 ```php
 // 定義 Model

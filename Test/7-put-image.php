@@ -10,85 +10,123 @@ $sql = "CREATE TABLE `ImageUser` (
   `createAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
-if ($error = \M\Core\Connection::instance()->query($sql)) throw new Exception($error);
+if ($error = \M\Core\Connection::instance()->runQuery($sql)) {
+  throw $error;
+}
 
-$path1 = PATH_SAMPLE . 'avatar2.jpg';
-$path2 = PATH_SAMPLE . 'avatar3.jpg';
+$path1 = PATH_STORAGE . 'avatar2.jpg';
+$path2 = PATH_STORAGE . 'avatar3.jpg';
 
 function resetImage($path1, $path2) {
-  @exec('rm -rf ' . PATH . 'Storage/*');
+  @exec('rm -rf ' . PATH_TMP . '*');
+  @exec('rm -rf ' . PATH_STORAGE . '*');
 
-  if (!(file_exists($path1) || @copy(PATH_SAMPLE . 'avatar.jpg', $path1)))
+  if (!(file_exists($path1) || @copy(PATH_SAMPLE . 'avatar.jpg', $path1))) {
     throw new Exception();
-  
-  if (!(file_exists($path2) || @copy(PATH_SAMPLE . 'avatar.jpg', $path2)))
-    throw new Exception();
+  }
 
-  \M\ImageUser::truncate();
-  return \M\ImageUser::create();
+  if (!(file_exists($path2) || @copy(PATH_SAMPLE . 'avatar.jpg', $path2))) {
+    throw new Exception();
+  }
+
+  \M\Image\User::truncate();
+  return \M\Image\User::create();
 }
 
 $u = resetImage($path1, $path2);
 
-if ($u->avatar1->value !== null) throw new Exception();
-if (!$u->avatar1->isNull()) throw new Exception();
-if (!$u->avatar1->isEmpty()) throw new Exception();
-if ($u->avatar2->value !== '') throw new Exception();
-if (!$u->avatar2->isEmpty()) throw new Exception();
+if ($u->avatar1->getValue() !== null) {
+  throw new Exception();
+}
+if ($u->avatar2->getValue() !== '') {
+  throw new Exception();
+}
 
-if ($u->avatar1->put($path1) !== true) throw new Exception();
-if (\M\ImageUser::one()->avatar1->value !== null) throw new Exception();
-if (!\M\ImageUser::one()->avatar1->isNull()) throw new Exception();
-if (!\M\ImageUser::one()->avatar1->isEmpty()) throw new Exception();
-if ($u->avatar2->put($path2) !== true) throw new Exception();
-if (\M\ImageUser::one()->avatar2->value !== '') throw new Exception();
-if (!\M\ImageUser::one()->avatar2->isEmpty()) throw new Exception();
+$u->avatar1 = $path1;
+if (\M\Image\User::one()->avatar1->getValue() !== null) {
+  throw new Exception();
+}
 
-if ($u->save() === null) throw new Exception();
-if (\M\ImageUser::one()->avatar1->value === null) throw new Exception();
-if (\M\ImageUser::one()->avatar1->isNull()) throw new Exception();
-if (\M\ImageUser::one()->avatar1->isEmpty()) throw new Exception();
-if (\M\ImageUser::one()->avatar2->value === '') throw new Exception();
-if (\M\ImageUser::one()->avatar2->isEmpty()) throw new Exception();
+$u->avatar2 = $path2;
+if (\M\Image\User::one()->avatar2->getValue() !== '') {
+  throw new Exception();
+}
+
+if ($u->save() === null) {
+  throw new Exception();
+}
+
+if (\M\Image\User::one()->avatar1->getValue() === null) {
+  throw new Exception();
+}
+if (\M\Image\User::one()->avatar2->getValue() === '') {
+  throw new Exception();
+}
+
+$u = resetImage($path1, $path2);
+
+if ($u->avatar1->getValue() !== null) {
+  throw new Exception();
+}
+if ($u->avatar2->getValue() !== '') {
+  throw new Exception();
+}
+
+$u->avatar1 = $path1;
+$u->save();
+if (\M\Image\User::one()->avatar1->getValue() === null) {
+  throw new Exception();
+}
+
+$u->avatar2 = $path2;
+$u->save();
+if (\M\Image\User::one()->avatar2->getValue() === '') {
+  throw new Exception();
+}
 
 $u = resetImage($path1, $path2);
 
-if ($u->avatar1->value !== null) throw new Exception();
-if (!$u->avatar1->isNull()) throw new Exception();
-if (!$u->avatar1->isEmpty()) throw new Exception();
-if ($u->avatar2->value !== '') throw new Exception();
-if (!$u->avatar2->isEmpty()) throw new Exception();
+if ($u->avatar1->getUrl() !== 'http://dev.orm.ioa.tw/404.png') {
+  throw new Exception();
+}
+if ($u->avatar2->getUrl() !== 'http://dev.orm.ioa.tw/404.png') {
+  throw new Exception();
+}
+if (array_keys($u->avatar1->getVersions()) !== ['w100', 'rotate']) {
+  throw new Exception();
+}
+if (array_keys($u->avatar2->getVersions()) !== ['w100']) {
+  throw new Exception();
+}
 
-if ($u->avatar1->put($path1, true) !== $u) throw new Exception();
-if (\M\ImageUser::one()->avatar1->value === null) throw new Exception();
-if (\M\ImageUser::one()->avatar1->isNull()) throw new Exception();
-if (\M\ImageUser::one()->avatar1->isEmpty()) throw new Exception();
 
-if ($u->avatar2->put($path2, true) !== $u) throw new Exception();
-if (\M\ImageUser::one()->avatar2->value === '') throw new Exception();
-if (\M\ImageUser::one()->avatar2->isEmpty()) throw new Exception();
+$u->avatar1 = $path1;
+$u->save();
 
-$u = resetImage($path1, $path2);
-if ($u->avatar1->url() !== 'http://dev.orm.ioa.tw/404.png') throw new Exception();
-if ($u->avatar2->url() !== 'http://dev.orm.ioa.tw/404.png') throw new Exception();
-if (array_keys($u->avatar1->versions()) !== ['w100', 'pad', 'c120x120', 'rotate']) throw new Exception();
-if (array_keys($u->avatar2->versions()) !== ['w100', 'pad', 'c120x120']) throw new Exception();
-if ($u->avatar1->put($path1, true) !== $u) throw new Exception();
-if ($u->avatar1->clean() !== true) throw new Exception();
-if (\M\ImageUser::one()->avatar1->value === null) throw new Exception();
-if (\M\ImageUser::one()->avatar1->isNull()) throw new Exception();
-if (\M\ImageUser::one()->avatar1->isEmpty()) throw new Exception();
+$u->avatar1 = '';
 
-if ($u->avatar2->put($path2, true) !== $u) throw new Exception();
-if ($u->avatar2->clean() !== true) throw new Exception();
-if (\M\ImageUser::one()->avatar2->value === '') throw new Exception();
-if (\M\ImageUser::one()->avatar2->isEmpty()) throw new Exception();
+if (\M\Image\User::one()->avatar1->getValue() === null) {
+  throw new Exception();
+}
 
-if ($u->avatar1->clean(true) !== $u) throw new Exception();
-if (\M\ImageUser::one()->avatar1->value !== null) throw new Exception();
-if (!\M\ImageUser::one()->avatar1->isNull()) throw new Exception();
-if (!\M\ImageUser::one()->avatar1->isEmpty()) throw new Exception();
+$u->avatar2 = $path2;
+$u->save();
 
-if ($u->avatar2->clean(true) !== $u) throw new Exception();
-if (\M\ImageUser::one()->avatar2->value !== '') throw new Exception();
-if (!\M\ImageUser::one()->avatar2->isEmpty()) throw new Exception();
+$u->avatar2 = '';
+
+if (\M\Image\User::one()->avatar2->getValue() === '') {
+  throw new Exception();
+}
+
+$u->avatar1 = '';
+$u->save();
+
+if (\M\Image\User::one()->avatar1->getValue() !== null) {
+  throw new Exception();
+}
+
+$u->avatar2 = '';
+$u->save();
+if (\M\Image\User::one()->avatar2->getValue() !== '') {
+  throw new Exception();
+}

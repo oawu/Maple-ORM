@@ -42,7 +42,7 @@ class Article extends Model {}
 
 ```php
 $user = \M\User::one(1);
-$articles = \M\Article::all('userId = ?', $user->id);
+$articles = \M\Article::all('userId', $user->id);
 
 foreach ($articles as $article) {
   echo $article->title;
@@ -50,7 +50,7 @@ foreach ($articles as $article) {
 }
 
 $user = \M\User::one(3);
-$articles = \M\Article::all('userId = ?', $user->id);
+$articles = \M\Article::all('userId', $user->id);
 echo count($articles); // 0
 ```
 
@@ -61,7 +61,7 @@ echo count($articles); // 0
 ```php
 class User extends Model {
   public function articles() {
-    return hasMany(Article::class);
+    return $this->hasMany(Article::class);
   }
 }
 ```
@@ -103,7 +103,7 @@ var_dump($user); // null
 ```php
 class Article extends Model {
   public function user() {
-    return belongToOne(User::class);
+    return $this->belongToOne(User::class);
   }
 }
 ```
@@ -121,7 +121,7 @@ var_dump($article->user); // null
 ```
 
 > `hasMany` 是一對多模式，故取出來的的值會是**多筆**的，所以是回傳 **Model 陣列**，若找不到任何資料則回 **空陣列**
-> 
+>
 > 反之 `belongToOne` 是屬於某一筆資料，所以回傳結果會是 **Model 物件**，若找不到關聯則回傳 **null**
 
 
@@ -135,7 +135,7 @@ var_dump($article->user); // null
 ```php
 class User extends Model {
   public function article() {
-    return hasOne(Article::class);
+    return $this->hasOne(Article::class);
   }
 }
 
@@ -156,7 +156,7 @@ var_dump($user->article); // null
 ```php
 class User extends Model {
   public function articles() {
-    return hasMany(Article::class);
+    return $this->hasMany(Article::class);
   }
 }
 
@@ -169,13 +169,13 @@ foreach ($articles as $article) {
 ```
 
 > **關聯函式** 若當變數執行，則直接下執行 SQL 查詢，如果是 `hasMany`、`belongToMany` 則回傳 **Model 陣列**，若是 `hasOne`、`belongTo` 則回傳 **Model 物件** 或 **null**。
-> 
+>
 > 第二次執行 **關聯函式** 的變數時，則會快取上次的變數結果，故不會再下 SQL 查詢。
-> 
+>
 > Ex.
 > `var_dump($user->article);`
 > `var_dump($user->article);`
-> 
+>
 > 上例執行了兩次關聯函式，但因為是採用變數方式，故只會查詢一次 SQL。
 
 
@@ -192,13 +192,13 @@ foreach ($articles as $article) {
 ```php
 class User extends Model {
   public function articles() {
-    return hasMany(Article::class, 'userId', 'id');
+    return $this->hasMany(Article::class, 'userId', 'id');
   }
 }
 
 class Article extends Model {
   public function user() {
-    return belongToOne(User::class, 'userId', 'id');
+    return $this->belongToOne(User::class, 'userId', 'id');
   }
 }
 ```

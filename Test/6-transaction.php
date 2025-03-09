@@ -9,31 +9,48 @@ $sql = "CREATE TABLE `TransactionUser` (
   `createAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
-if ($error = \M\Core\Connection::instance()->query($sql)) throw new Exception($error);
+if ($error = \M\Core\Connection::instance()->runQuery($sql)) {
+  throw $error;
+}
 
-$error = null;
-$user = \M\transaction(function() { return \M\TransactionUser::create() ?: \M\rollback(); }, $error);
-if (!($error && $error[0] == '「name」欄位不可以為 NULL')) throw new Exception();
+$errors = null;
+$user = \M\Helper::transaction(null, static function() { return \M\Transaction\User::create() ?: \M\Helper::rollback(); }, $errors);
+if (!($user === null && $errors && $errors[0] == '實體 Model 時發生錯誤，錯誤原因：欄位「name」不可以為 NULL')) {
+  throw new Exception();
+}
 
-$error = null;
-$user = \M\transaction(function() { return \M\TransactionUser::create(['name' => 'OA']) ?: \M\rollback(); }, $error);
-if (!($error === null && $user)) throw new Exception();
+$errors = null;
+$user = \M\Helper::transaction(null, static function() { return \M\Transaction\User::create(['name' => 'OA']) ?: \M\Helper::rollback(); }, $errors);
+if (!($user !== null && $errors === null)) {
+  throw new Exception();
+}
 
-$error = null;
-$user = \M\transaction(function() {
-  \M\TransactionUser::create(['name' => 'OA']);
+$errors = null;
+$user = \M\Helper::transaction(null, static function() {
+  \M\Transaction\User::create(['name' => 'OA']);
   throw new \Exception('Error');
-}, $error);
-if (!($error && $error[0] == 'Error')) throw new Exception();
+}, $errors);
+if (!($user === null && $errors && $errors[0] == 'Error')) {
+  throw new Exception();
+}
 
-$error = null;
-$user = \M\transaction(function() { return !\M\TransactionUser::create(['name' => 'OA']); }, $error);
-if (!($error && $error[0] == 'transaction 回傳 false，故 rollback')) throw new Exception();
+$errors = null;
+$user = \M\Helper::transaction(null, static function() { return !\M\Transaction\User::create(['name' => 'OA']); }, $errors);
+if (!($errors && $errors[0] == 'transaction 回傳 false，故 rollback')) {
+  throw new Exception();
+}
 
-$error = null;
-$user = \M\transaction(function() { return \M\TransactionUser::create(['name' => 'OB']) ?: \M\rollback(); }, $error);
-
-if (!($error === null && $user)) throw new Exception();
-if (\M\TransactionUser::count() != 2) throw new Exception();
-if (\M\TransactionUser::one()->id != 1) throw new Exception();
-if (\M\TransactionUser::last()->id != 4) throw new Exception();
+$errors = null;
+$user = \M\Helper::transaction(null, static function() { return \M\Transaction\User::create(['name' => 'OB']) ?: \M\Helper::rollback(); }, $errors);
+if (!($user !== null && $errors === null)) {
+  throw new Exception();
+}
+if (\M\Transaction\User::count() != 2) {
+  throw new Exception();
+}
+if (\M\Transaction\User::one()->id != 1) {
+  throw new Exception();
+}
+if (\M\Transaction\User::last()->id != 4) {
+  throw new Exception();
+}
