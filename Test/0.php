@@ -1,19 +1,31 @@
 <?php
 
-if (\M\Core\Connection::instance()->query('show tables;', [], $sth)) {
-  var_dump('show tables Error');
-  exit(1);
-}
+use \Orm\Core\Connection;
+use \Orm\Model;
 
-$tables = [];
-foreach ($sth->fetchAll() as $row)
-  array_push($tables, array_shift($row));
+$stmt = null;
 
-foreach ($tables as $table) {
-  if (\M\Core\Connection::instance()->query('DROP TABLE IF EXISTS `' . $table . '`;')) {
-    var_dump('drop table `' . $table . '` Error');
+foreach (Connection::getDbs() as $db) {
+  if (Connection::instance($db)->runQuery('show tables;', [], $stmt)) {
+    var_dump('show tables Error');
     exit(1);
+  }
+
+  $tables = [];
+  foreach ($stmt->fetchAll() as $row) {
+    array_push($tables, array_shift($row));
+  }
+
+  foreach ($tables as $table) {
+    if (Connection::instance($db)->runQuery('DROP TABLE IF EXISTS `' . $table . '`;')) {
+      var_dump('drop table `' . $table . '` Error');
+      exit(1);
+    }
   }
 }
 
-\M\Model::case(\M\Model::CASE_CAMEL);
+@exec('rm -rf ' . PATH_TMP . '*');
+@exec('rm -rf ' . PATH_STORAGE . '*');
+
+Model::setCaseTable(Model::CASE_CAMEL);
+Model::setCaseColumn(Model::CASE_CAMEL);

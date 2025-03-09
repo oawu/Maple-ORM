@@ -8,7 +8,7 @@
 #### 格式
 | 欄位 | 格式  |
 |---|---|
-| id | INT | 
+| id | INT |
 | name | VARCHAR |
 | age | INT |
 
@@ -23,9 +23,9 @@
 ### Model
 
 ```php
-namespace M;
+namespace App\Model;
 
-class User extends Model {}
+class User extends \Orm\Model {}
 ```
 
 ## 查詢方式
@@ -37,16 +37,16 @@ class User extends Model {}
 * `all` 是取得所有結果，以物件的 **陣列** 方式呈現。
 
 ```php
-$user = \M\User::one();
+$user = \App\Model\User::one();
 echo $user->name; // OA
 
-$user = \M\User::first();
+$user = \App\Model\User::first();
 echo $user->name; // OA
 
-$user = \M\User::last();
+$user = \App\Model\User::last();
 echo $user->name; // OC
 
-$users = \M\User::all();
+$users = \App\Model\User::all();
 foreach ($users as $user) {
   echo $user->name;
   // 會依序印出 OA、OB、OC
@@ -59,8 +59,8 @@ foreach ($users as $user) {
 
 ```
  Model::
-   [where, whereIn, whereNotIn, whereBetween, select, order, group, having, limit, offset, keyBy, relation]
-   [where, whereIn, whereNotIn, whereBetween, select, order, group, having, limit, offset, keyBy, relation, orWhere, orWhereIn, orWhereNotIn, orWhereBetween]*
+   [where, whereIn, whereNotIn, whereBetween, select, order, group, having, limit, offset, byKey, relation]
+   [where, whereIn, whereNotIn, whereBetween, select, order, group, having, limit, offset, byKey, relation, orWhere, orWhereIn, orWhereNotIn, orWhereBetween]*
    [one, first, last, all, count, update, delete]()
 
  Model::
@@ -68,27 +68,27 @@ foreach ($users as $user) {
 ```
 
 ```php
-$user = \M\User::where('age < ?', 20)->and('id > ?', 1)->one();
+$user = \App\Model\User::where('age', '<', 20)->and('id', '>', 1)->one();
 echo $user->name; // OC
 ```
 
 如果只是為了**查詢某一筆 id** 的話，也可以再簡寫如下：
 
 ```php
-$user = \M\User::one(2);
+$user = \App\Model\User::one(2);
 echo $user->name; // OB
 ```
 
 ## Where IN
 
 ```php
-$users = \M\User::all([1, 3]); // id IN [1, 3]
+$users = \App\Model\User::all([1, 3]); // id IN [1, 3]
 foreach ($users as $user) {
   echo $user->name;
   // 會依序印出 OA、OC
 }
 
-$users = \M\User::whereIn('id', [1, 3])->all();
+$users = \App\Model\User::whereIn('id', [1, 3])->all();
 foreach ($users as $user) {
   echo $user->name;
   // 會依序印出 OA、OC
@@ -96,17 +96,17 @@ foreach ($users as $user) {
 ```
 
 ## 進階條件
-加入 `limit`、`offset` 
+加入 `limit`、`offset`
 
 ```php
-$user = \M\User::limit(11)->offset(1)->where('id', '>', 0)->one();
+$user = \App\Model\User::limit(11)->offset(1)->where('id', '>', 0)->one();
 echo $user->name; // OB
 ```
 
 以上介紹的條件，不只在 `one` 可以用，如開始提到的 `one`、`first`、`last`、`all` 皆可使用。
 
 ```php
-$users = \M\User::where('id', '>', 1)->all();
+$users = \App\Model\User::where('id', '>', 1)->all();
 foreach ($users as $user) {
   echo $user->name;
   // 會依序印出 OB、OC
@@ -119,14 +119,14 @@ foreach ($users as $user) {
 除 `one`、`first`、`last`、`all` 方法外，也有個方法 `count` 可以提供快速的查詢筆數，其範例如下：
 
 ```php
-$total = \M\User::count();
+$total = \App\Model\User::count();
 echo $total; // 3
 ```
 
 count 亦可配合上述的條件情境使用。
 
 ```php
-$total = \M\User::where('id', '>', 1)->count();
+$total = \App\Model\User::where('id', '>', 1)->count();
 echo $total; // 2
 ```
 
@@ -137,29 +137,29 @@ echo $total; // 2
 如果取不到任何資料時，則會回 `null`，如下範例：
 
 ```php
-$user = \M\User::one(4); // id = 4
+$user = \App\Model\User::one(4); // id = 4
 echo $user ? $user->name : 'NULL'; // NULL
 
-$user = \M\User::one(3); // id = 3
+$user = \App\Model\User::one(3); // id = 3
 echo $user ? $user->name : 'NULL'; // OC
 ```
 
 由 `all` 所取得的資料就會包裝成該 Model 物件的陣列型態，如果取不到任何資料時，則會回傳 **空陣列**。
 
 ```php
-$users = \M\User::all();
+$users = \App\Model\User::all();
 echo count($users); // 3
 echo $users[1]->name; // OB
 
-$users = \M\User::all('id IN (?)', [4, 5, 6]);
+$users = \App\Model\User::all('id', [4, 5, 6]);
 echo count($users); // 0
 ```
 
-## keyBy
+## byKey
 由 `all` 的結果可以取得查詢後的 **Model 陣列**，但有時候我們希望藉由某個欄位做分類，如下面例子需要依據取得後的物件 `id` 做排序，正常寫法為：
 
 ```php
-$users = \M\User::all();
+$users = \App\Model\User::all();
 $byIdUsers = [];
 foreach ($users as $user) {
   $byIdUsers[$user->id] ?? $byIdUsers[$user->id] = [];
@@ -168,9 +168,9 @@ foreach ($users as $user) {
 var_dump($byIdUsers);
 ```
 
-可以使用 `keyBy` 函式也可以達到相同的效果。
+可以使用 `byKey` 函式也可以達到相同的效果。
 
 ```php
-$users = \M\User::keyBy('id')->all();
+$users = \App\Model\User::byKey('id')->all();
 var_dump($users);
 ```

@@ -21,11 +21,11 @@
 ### Model
 
 ```php
-namespace M;
+namespace App\Model;
 
-class Task extends Model {}
+class Task extends \Orm\Model {}
 
-class User extends Model {}
+class User extends \Orm\Model {}
 ```
 
 ## 上傳器
@@ -34,10 +34,10 @@ class User extends Model {}
 例如在特定的需求下，需要紀錄 **任務 1** 綁定某一個檔案，如下例子：
 
 ```php
-$task = \M\Task::one(1);
+$task = \App\Model\Task::one(1);
 
 // 綁定檔案
-$task->zip->put('/path/.../demo.zip');
+$task->zip = '/path/.../demo.zip';
 
 // 更新
 $task->save();
@@ -53,7 +53,7 @@ echo $task->zip->url(); // http://.../md5code.zip
 ```php
 class Task extends Model {}
 
-Task::uploader('zip', 'File');
+Task::bindFile('zip');
 ```
 
 在該 Model 下方設定指定綁定的欄位與型態，目前可用型態有 `File`、`Image`。
@@ -64,19 +64,22 @@ Task::uploader('zip', 'File');
 
 上傳器可以接收的格式有 `$_FILES`、`url`、`file` 三種格式。
 
-在 `put` 完成後會回傳 `bool` 格式的結果，成功為 `true`，失敗為 `false`
+設定值時，若失敗會直接拋出錯誤（`throw new Exception`）。
 
 ```php
-$task = \M\Task::one(1);
+$task = \App\Model\Task::one(1);
 
 // file 檔案方式
-$task->zip->put('/path/.../demo.zip');
+$task->zip = '/path/.../demo.zip';
 
 // POST FILE 檔案方式
-$task->zip->put($_FILES['demo']);
+$task->zip = $_FILES['demo'];
 
 // POST FILE 檔案方式
-$task->zip->put('http://.../demo.zip');
+$task->zip = 'http://.../demo.zip';
+
+// 清除資料
+$task->zip = '';
 ```
 
 ## 儲存位置
@@ -84,8 +87,8 @@ $task->zip->put('http://.../demo.zip');
 當按儲存的方式有兩種，分別為 `Local` 與 `S3` 的儲存方式，可使用 `\M\Model::setUploader` 來設定所有上傳器的 `driver`。
 
 ```php
-\M\Model::setUploader(function($uploader) {
-  $uploader->driver('Local', ['dir' => PATH]);
+\M\Model::setUploader(static function(M\Core\Plugin\Uploader $uploader): void {
+  $uploader->setDriver('Local', ['storage' => PATH]);
 });
 ```
 
@@ -94,8 +97,17 @@ $task->zip->put('http://.../demo.zip');
 ```php
 class Task extends Model {}
 
-Task::uploader('zip', 'File')
-    ->driver('Local', ['dir' => PATH]);
+Task::bindFile('zip', static function(M\Core\Plugin\Uploader $uploader): void {
+  $uploader->setDriver('S3', [
+    'bucket' => '',
+    'access' => '',
+    'secret' => '',
+    'region' => 'ap-northeast-1',
+    'acl' => 'private',
+    'ttl' => 0,
+    'isUseSSL' => false,
+  ]);
+});
 ```
 
 詳細設定可以參考 [初始設定](00_config.md)。
@@ -123,16 +135,16 @@ Task::uploader('zip', 'File')
 ## 網址
 
 ### 網址
-綁定過後的資料可以使用 `->url()` 來取得該檔案網址。
+綁定過後的資料可以使用 `->getUrl()` 來取得該檔案網址。
 
 ```php
-$task = \M\Task::one(1);
+$task = \App\Model\Task::one(1);
 
-$task->zip->put($_FILES['demo']);
+$task->zip = $_FILES['demo'];
 
 $task->save();
 
-echo $task->zip->url();
+echo $task->zip->getUrl();
 // http://demo.url/Storage/Task/zip/0000/0001/fe01ce2a7fbac8fafaed7c982a04e229.zip
 ```
 
@@ -140,12 +152,12 @@ echo $task->zip->url();
 
 若是該筆檔案未有綁定過檔案，需要給予一個 **預設網址**，則可以使用 `default` 函式設定，其設定方式與 **儲存位置**、**儲存路徑** 方法相同，可由 `\M\Model::setUploader` 設定或依據各個 `Model` 需求設定。
 
-假設設定 `$uploader->default('http://demo.url/demo.zip');` 時，`Task` 的 `zip` 欄位為 `null` 或為 `空` 時，就會以預設網址當網址的回傳字串。
+假設設定 `$uploader->setDefaultUrl('http://demo.url/demo.zip');` 時，`Task` 的 `zip` 欄位為 `null` 或為 `空` 時，就會以預設網址當網址的回傳字串。
 
 ```php
-$task = \M\Task::one(1);
+$task = \App\Model\Task::one(1);
 
-echo $task->zip->url();
+echo $task->zip->getUrl();
 // http://demo.url/demo.zip
 ```
 
@@ -158,47 +170,55 @@ echo $task->zip->url();
 ```php
 class User extends Model {}
 
-User::uploader('avatar', 'Image');
+
+User::bindImage('avatar', static function(M\Core\Plugin\Uploader\Image $image) {
+  // 設定命名規則
+  $image
+    ->setNamingSort(
+      'md5',
+      'random',
+      'origin',
+    );
+
+  // 設定縮圖版本
+  $image
+    ->addVersion('rotate')
+    ->setMethod('rotate')
+    ->setArgs(45);
+});
+
 ```
 
 圖片上傳器可以接收的格式也是 `$_FILES`、`url`、`file` 三種格式，而儲存類型也是有 `Local` 與 `S3` 兩種方式。
 
-圖片上傳器可以指定圖片裁切版本，如下：
-
-```php
-class User extends Model {}
-
-User::uploader('avatar', 'Image')
-    ->version('rotate', 'rotate', [45]);
-```
 
 經過設定後的上傳器，在綁定圖片時，也會依據設定 `version` 製作不同的圖片
 
 ```php
-$user = \M\User::one(1);
+$user = \App\Model\User::one(1);
 
-$user->avatar->put($_FILES['avatar']);
+$user->avatar = $_FILES['avatar'];
 
 $user->save();
 
 // 取得原始圖檔
-echo $user->avatar->url();
+echo $user->avatar->getUrl();
 // http://demo.url/Storage/User/avatar/0000/0001/fe01ce2a7fbac8fafaed7c982a04e229.png
 
 // 取得選轉 45度 圖檔
-echo $user->avatar->url('rotate');
+echo $user->avatar->getUrl('rotate');
 // http://demo.url/Storage/User/avatar/0000/0001/rotate_fe01ce2a7fbac8fafaed7c982a04e229.png
 ```
 
-圖片縮圖裁切功能，需由 `\M\Model::thumbnail` 設定採用哪些縮圖工具，相關設定可以參考 [初始設定](00_config.md)。
+圖片縮圖裁切功能，需由 `\M\Model::setImageThumbnail` 設定採用哪些縮圖工具，相關設定可以參考 [初始設定](00_config.md)。
 
 本專案內已有提供了 `Gd` 與 `Imagick` 兩種縮圖工具。
 
 ### 縮圖版本說明
 `version` 一共有三個參數需要放置，依序如下：
 
-* key - 用來識別版本的關鍵字串
-* thumbnail - 縮圖工具的方法
-* params - 縮圖時需帶入的參數
+* addVersion - 用來識別版本的關鍵字串
+* setMethod - 縮圖工具的方法
+* setArgs - 縮圖時需帶入的參數
 
-由於 version 版本不同，就可以在 `->url()` 時帶入不同的 `key`，如此就可以取得各自的版本網址。
+由於 version 版本不同，就可以在 `->getUrl()` 時帶入不同的 `key`，如此就可以取得各自的版本網址。

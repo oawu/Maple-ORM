@@ -36,34 +36,35 @@
 ### Model
 
 ```php
-namespace M;
+namespace App\Model;
 
-class User extends Model {
+class User extends \Orm\Model {
   public function articles() {
-    return hasMany(Article::class);
+    return $this->hasMany(Article::class);
   }
 }
 
-class Article extends Model {
+class Article extends \Orm\Model {
   public function comments() {
-    return hasMany(Comment::class);
+    return $this->hasMany(Comment::class);
   }
 }
 
-class Comment extends Model {}
+class Comment extends \Orm\Model {}
 ```
 
 ## 預先關聯
+為了解決 `N + 1` 查詢問題。
 
 ### 理解
 使用關聯方式查詢資料庫會增加程式碼的整潔度與可讀性，但在某些情境上要特別注意，在使用**預先關聯**之前，可能需要先了解一下**關聯資料**的基礎原理。
 
 單筆 `User` 下取得其所有 `Article` 的例子而言，程式碼會下兩次 Query 跟資料庫索取資料。
 
-> 這部分可以用 `\M\Model::queryLogFunc` 開啟檢視 `Query Log`，詳細設定可以參考 [初始設定](00_config.md)。
+> 這部分可以用 `\M\Model::setQueryLogFunc` 開啟檢視 `Query Log`，詳細設定可以參考 [初始設定](00_config.md)。
 
 ```php
-$user = \M\User::one(1);
+$user = \App\Model\User::one(1);
 foreach ($user->articles as $article) {
   echo $article->title;
   // 依序會印出 "文章 1"、"文章 3"、"文章 4"
@@ -80,7 +81,7 @@ RAW：SELECT * FROM `Article` WHERE `userId` = ?
 VAL：[1]
 ```
 
-由 `Query Log` 可得知，在執行 `$user = \M\User::one(1);` 時會先產生第一次的 Query，而在讀取 `$user->articles` 時，會下第二次的 Query
+由 `Query Log` 可得知，在執行 `$user = \App\Model\User::one(1);` 時會先產生第一次的 Query，而在讀取 `$user->articles` 時，會下第二次的 Query
 
 
 ### 問題
@@ -88,7 +89,7 @@ VAL：[1]
 理解關聯的原理後，思考一下，如果當程式需求為 `多筆 User` 每一筆 `User` 皆要取得其 `Article` 呢？
 
 ```php
-$users = \M\User::all();
+$users = \App\Model\User::all();
 foreach ($users as $user) {
   echo $user->name;
 
@@ -121,7 +122,7 @@ RAW：SELECT * FROM `Article` WHERE `userId` = ?
 VAL：[3]
 ```
 
-由 `Query Log` 可得知，第一個 Query 為 `\M\User::all();` 所產生的，而後三個則為各自的 `User` 在 `$user->articles` 時所產生的 Query！
+由 `Query Log` 可得知，第一個 Query 為 `\App\Model\User::all();` 所產生的，而後三個則為各自的 `User` 在 `$user->articles` 時所產生的 Query！
 
 如此一來當 `User` 有 100 筆資料時，資料庫必然需要執行 1 + 100 次的 Query。
 
@@ -130,7 +131,7 @@ VAL：[3]
 理解原理與問題後，就可以使用 **預先關聯** 來解決此問題。因為知道知道取得所有 `User` 之後，會接著取得各個 `User` 各自的 `Article`，所以就可以使用 `relation` 參數來將後面即將執行的 Query 集合起來。
 
 ```php
-$users = \M\User::relation('articles')->all();
+$users = \App\Model\User::relation('articles')->all();
 foreach ($users as $user) {
   echo $user->name;
 
@@ -157,7 +158,7 @@ RAW：SELECT * FROM `Article` WHERE `userId` IN (?,?,?)
 VAL：[1,2,3]
 ```
 
-由 `Query Log` 可得知，第一個 Query 依然是 `\M\User::all();` 所產生的，而原本後三個改變為使用 `WHERE IN` 的 Query，等取得各自的 `Article`，系統會在將各自的 `Article` 分配回去給各自的 `User`。
+由 `Query Log` 可得知，第一個 Query 依然是 `\App\Model\User::all();` 所產生的，而原本後三個改變為使用 `WHERE IN` 的 Query，等取得各自的 `Article`，系統會在將各自的 `Article` 分配回去給各自的 `User`。
 
 如此 Query 就可以由原本的 `N + 1` 縮減到 `2` 個 Query 了，對於資料庫效能上可以解省不少。
 
@@ -168,7 +169,7 @@ VAL：[1,2,3]
 試著想像沒有 `relation` 的情境下，你會如何解決 `N + 1` 的 Query 問題？
 
 ```php
-$users = \M\User::all();
+$users = \App\Model\User::all();
 
 // 取得所有 User ID
 $userIds = array_map(function($user) {
@@ -176,7 +177,7 @@ $userIds = array_map(function($user) {
 }, $users);
 
 // 取出這些 User 的所有 Article
-$allArticles = \M\Article::whereIn('userId', $userIds)->all();
+$allArticles = \App\Model\Article::whereIn('userId', $userIds)->all();
 
 // 以 userId 為 key 組合出各個 User 所屬的 Article
 $articles = [];

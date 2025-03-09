@@ -5,8 +5,8 @@
 回傳結果若為 `null`、`false`、`0`、`[]`、`""`、`"0"`，皆為錯，所以會 rollback
 
 ```php
-$result = \M\transaction(function() {
-  $user = \M\User::create([
+$result = \Orm\Helper::transaction('db', static function() {
+  $user = \App\Model\User::create([
     'name' => 'OA'
   ]);
 
@@ -14,5 +14,5 @@ $result = \M\transaction(function() {
 });
 
 // 因為 transaction 最後回傳為 false，所以沒有新增，全部數量為 0
-echo \M\User::count(); // 0
+echo \App\Model\User::count(); // 0
 ```
