@@ -35,6 +35,7 @@ abstract class Model {
   private static string $_caseTable = Model::CASE_CAMEL;
   private static string $_caseColumn = Model::CASE_CAMEL;
   private static ?Hashids $_hashids = null;
+  private static $_binds = [];
 
   // =============================
   public static function setErrorFunc(?callable $func = null): void {
@@ -101,7 +102,7 @@ abstract class Model {
     return $closure();
   }
 
-  public static function setDir(string $dir): void {
+  public static function setDir(string $namespace, string $dir): void {
     if (!is_dir($dir)) {
       return;
     }
@@ -113,17 +114,21 @@ abstract class Model {
     }
 
     self::$_dirsFunc = static function($_class) use ($dir): void {
-      $namespaces = array_slice(explode('\\', $_class), 0, -1);
+      if (class_exists($_class)) {
+        return;
+      }
+
+      $tokens = explode('\\', $_class);
+      $namespaces = array_slice($tokens, 0, -1);
       if (!$namespaces) {
         return;
       }
 
       $namespace = array_shift($namespaces);
-      if ($namespace !== 'M') {
+      if ($namespace !== $namespace) {
         return;
       }
-
-      $class = end(explode('\\', $_class));
+      $class = $tokens[count($tokens) - 1];
       $path = $dir . ($namespaces ? DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $namespaces) : '') . DIRECTORY_SEPARATOR . $class . '.php';
 
       if (is_file($path) && is_readable($path)) {
@@ -134,32 +139,6 @@ abstract class Model {
     spl_autoload_register(self::$_dirsFunc);
   }
 
-  // private static function _dirs($dirs) {
-  //   self::$dirs !== null || spl_autoload_register(function($className) {
-  //     if (!$namespaces = getNamespaces($className))
-  //       return false;
-
-  //     if (!in_array($namespace = array_shift($namespaces), ['M']))
-  //       return false;
-
-  //     if (!$modelName = deNamespace($className))
-  //       return false;
-
-  //     foreach (self::$dirs as $dir)
-  //       if (is_file($tmp = $dir . $modelName . '.php') && is_readable($tmp))
-  //         if ($path = $tmp)
-  //           break;
-
-  //     if (!isset($path))
-  //       return false;
-
-  //     include_once $path;
-
-  //     return class_exists($className);
-  //   });
-
-  //   return $dirs !== null ? self::$dirs = $dirs : self::$dirs;
-  // }
   // =============================
   public static function setCaseTable(string $caseTable): void {
     if (in_array($caseTable, [Model::CASE_CAMEL, Model::CASE_SNAKE])) {
@@ -203,8 +182,6 @@ abstract class Model {
   public static function setUploader(callable $func): void {
     Uploader::func($func);
   }
-
-  private static $_binds = [];
 
   public static function bindFile(string $column, ?callable $func = null): void {
     // self::$_binds[] = [

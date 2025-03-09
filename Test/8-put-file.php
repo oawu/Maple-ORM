@@ -29,8 +29,8 @@ function resetFile($path1, $path2) {
     throw new Exception();
   }
 
-  \M\File\User::truncate();
-  return \M\File\User::create();
+  \Model\File\User::truncate();
+  return \Model\File\User::create();
 }
 
 $u = resetFile($path1, $path2);
@@ -43,21 +43,21 @@ if ($u->info2->getValue() !== '') {
 }
 
 $u->info1 = $path1;
-if (\M\File\User::one()->info1->getValue() !== null) {
+if (\Model\File\User::one()->info1->getValue() !== null) {
   throw new Exception();
 }
 $u->info2 = $path2;
-if (\M\File\User::one()->info2->getValue() !== '') {
+if (\Model\File\User::one()->info2->getValue() !== '') {
   throw new Exception();
 }
 
 if ($u->save() === null) {
   throw new Exception();
 }
-if (\M\File\User::one()->info1->getValue() === null) {
+if (\Model\File\User::one()->info1->getValue() === null) {
   throw new Exception();
 }
-if (\M\File\User::one()->info2->getValue() === '') {
+if (\Model\File\User::one()->info2->getValue() === '') {
   throw new Exception();
 }
 
@@ -72,13 +72,13 @@ if ($u->info2->getValue() !== '') {
 
 $u->info1 = $path1;
 $u->save();
-if (\M\File\User::one()->info1->getValue() === null) {
+if (\Model\File\User::one()->info1->getValue() === null) {
   throw new Exception();
 }
 
 $u->info2 = $path2;
 $u->save();
-if (\M\File\User::one()->info2->getValue() === '') {
+if (\Model\File\User::one()->info2->getValue() === '') {
   throw new Exception();
 }
 
@@ -93,25 +93,25 @@ if ($u->info2->getUrl() !== 'http://dev.orm.ioa.tw/404.png') {
 $u->info1 = $path1;
 $u->save();
 $u->info1 = '';
-if (\M\File\User::one()->info1->getValue() === null) {
+if (\Model\File\User::one()->info1->getValue() === null) {
   throw new Exception();
 }
 
 $u->info2 = $path2;
 $u->save();
 $u->info2 = '';
-if (\M\File\User::one()->info2->getValue() === '') {
+if (\Model\File\User::one()->info2->getValue() === '') {
   throw new Exception();
 }
 
 $u->info1 = '';
 $u->save();
-if (\M\File\User::one()->info1->getValue() !== null) {
+if (\Model\File\User::one()->info1->getValue() !== null) {
   throw new Exception();
 }
 
 $u->info2 = '';
 $u->save();
-if (\M\File\User::one()->info2->getValue() !== '') {
+if (\Model\File\User::one()->info2->getValue() !== '') {
   throw new Exception();
 }

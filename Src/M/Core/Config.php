@@ -3,15 +3,15 @@
 namespace M\Core;
 
 final class Config {
+  public static function create(array $options = []): self { // php8 -> return static
+    return new static($options);
+  }
+
   private string $_hostname = '';
   private string $_username = '';
   private string $_password = '';
   private string $_database = '';
   private string $_encoding = 'utf8mb4';
-
-  public static function create(array $options = []): self { // php8 -> return static
-    return new static($options);
-  }
 
   private function __construct(array $options = []) {
     $sample = array_flip(['hostname', 'username', 'password', 'database', 'encoding']);

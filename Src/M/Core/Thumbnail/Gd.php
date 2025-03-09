@@ -5,18 +5,6 @@ namespace M\Core\Thumbnail;
 use \M\Core\Thumbnail;
 
 final class Gd extends Thumbnail {
-  private array $_options = [
-    'resizeUp' => true,
-    'interlace' => true,
-    'jpgQuality' => 90,
-    'pngQuality' => 1,
-    'webpQuality' => 90,
-    'preserveAlpha' => true,
-    'preserveTransparency' => true,
-    'alphaMaskColor' => [255, 255, 255],
-    'transparencyMaskColor' => [0, 0, 0]
-  ];
-
   public static function getImage($format, $path) {
     switch ($format) {
       case 'gif': return imagecreatefromgif($path);
@@ -127,6 +115,18 @@ final class Gd extends Thumbnail {
   protected static function _getImageDimension($image): array {
     return [imagesx($image), imagesy($image)];
   }
+
+  private array $_options = [
+    'resizeUp' => true,
+    'interlace' => true,
+    'jpgQuality' => 90,
+    'pngQuality' => 1,
+    'webpQuality' => 90,
+    'preserveAlpha' => true,
+    'preserveTransparency' => true,
+    'alphaMaskColor' => [255, 255, 255],
+    'transparencyMaskColor' => [0, 0, 0]
+  ];
 
   public function __construct($path, $options = []) {
     parent::__construct($path);

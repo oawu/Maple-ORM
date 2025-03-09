@@ -1,6 +1,6 @@
 <?php
 
-namespace M\Image;
+namespace Model\Image;
 
 use M\Model;
 

@@ -25,29 +25,29 @@ if ($error = \M\Core\Connection::instance()->runQuery($sql)) {
   throw $error;
 }
 
-\M\Update\User::creates([
+\Model\Update\User::creates([
   ['name' => 'OA', 'bio' => 'Test', 'sex' => 'boy', 'birthday' => '1989-07-21', 'height' => '171.1', 'weight' => '79.8', 'info' => ['a' => 'a1', 'b' => [1, 2, 3]]],
   ['name' => 'OB', 'bio' => 'Test', 'sex' => 'girl', 'birthday' => '1989-03-19', 'height' => '151.1', 'weight' => '45', 'info' => null],
   ['name' => 'OC', 'bio' => 'Hi!', 'sex' => 'boy', 'birthday' => '2000-03-29', 'height' => '155.1', 'weight' => '47.1', 'info' => 'null'],
 ]);
 
-if (\M\Update\User::one(1)->birthday->getValue() != '1989-07-21') {
+if (\Model\Update\User::one(1)->birthday->getValue() != '1989-07-21') {
   throw new Exception();
 }
-if (\M\Update\User::one(2)->birthday->getValue() != '1989-03-19') {
+if (\Model\Update\User::one(2)->birthday->getValue() != '1989-03-19') {
   throw new Exception();
 }
-if (\M\Update\User::one(3)->birthday->getValue() != '2000-03-29') {
-  throw new Exception();
-}
-
-if (\M\Update\User::updates(['birthday' => '1900-01-01']) != 3) {
+if (\Model\Update\User::one(3)->birthday->getValue() != '2000-03-29') {
   throw new Exception();
 }
 
-$u1 = \M\Update\User::one(1);
-$u2 = \M\Update\User::one(2);
-$u3 = \M\Update\User::one(3);
+if (\Model\Update\User::updates(['birthday' => '1900-01-01']) != 3) {
+  throw new Exception();
+}
+
+$u1 = \Model\Update\User::one(1);
+$u2 = \Model\Update\User::one(2);
+$u3 = \Model\Update\User::one(3);
 
 if ($u1->birthday->getValue() != '1900-01-01') {
   throw new Exception();
@@ -67,72 +67,72 @@ if (!($u1->save() && $u2->save() && $u3->save())) {
   throw new Exception();
 }
 
-if (\M\Update\User::where('id', '!=', 1)->update(['birthday' => '1900-01-01']) != 2) {
+if (\Model\Update\User::where('id', '!=', 1)->update(['birthday' => '1900-01-01']) != 2) {
   throw new Exception();
 }
 
-if (\M\Update\User::one(1)->birthday->getValue() != '1989-07-21') {
+if (\Model\Update\User::one(1)->birthday->getValue() != '1989-07-21') {
   throw new Exception();
 }
-if (\M\Update\User::one(2)->birthday->getValue() != '1900-01-01') {
+if (\Model\Update\User::one(2)->birthday->getValue() != '1900-01-01') {
   throw new Exception();
 }
-if (\M\Update\User::one(3)->birthday->getValue() != '1900-01-01') {
+if (\Model\Update\User::one(3)->birthday->getValue() != '1900-01-01') {
   throw new Exception();
 }
 
-$u1 = \M\Update\User::one(1);
+$u1 = \Model\Update\User::one(1);
 if ($u1->info !== ['a' => 'a1', 'b' => [1, 2, 3]]) {
   throw new Exception();
 }
 $u1->info = null;
 $u1->save();
 
-$u1 = \M\Update\User::one(1);
+$u1 = \Model\Update\User::one(1);
 if ($u1->info !== null) {
   throw new Exception();
 }
 $u1->info = 'null';
 $u1->save();
 
-$u1 = \M\Update\User::one(1);
+$u1 = \Model\Update\User::one(1);
 if ($u1->info !== 'null') {
   throw new Exception();
 }
 $u1->info = 0;
 $u1->save();
 
-$u1 = \M\Update\User::one(1);
+$u1 = \Model\Update\User::one(1);
 if ($u1->info !== 0) {
   throw new Exception();
 }
 
-$u2 = \M\Update\User::one(2);
+$u2 = \Model\Update\User::one(2);
 $u2->info = ['a' => 'a1', 'b' => [1, 2, 3]];
 $u2->save();
-$u2 = \M\Update\User::one(2);
+$u2 = \Model\Update\User::one(2);
 if ($u2->info !== ['a' => 'a1', 'b' => [1, 2, 3]]) {
   throw new Exception();
 }
-\M\Update\User::where(2)->update(['info' => null]);
+\Model\Update\User::where(2)->update(['info' => null]);
 
-$u2 = \M\Update\User::one(2);
+$u2 = \Model\Update\User::one(2);
 if ($u2->info !== null) {
   throw new Exception();
 }
-\M\Update\User::where(2)->update(['info' => 'null']);
-$u2 = \M\Update\User::one(2);
+\Model\Update\User::where(2)->update(['info' => 'null']);
+$u2 = \Model\Update\User::one(2);
 if ($u2->info !== 'null') {
   throw new Exception();
 }
 
-\M\Update\User::where(2)->update(['info' => 0]);
-$u2 = \M\Update\User::one(2);
+\Model\Update\User::where(2)->update(['info' => 0]);
+$u2 = \Model\Update\User::one(2);
 if ($u2->info !== 0) {
   throw new Exception();
 }
 
-$u = \M\Update\User::one(1);
+$u = \Model\Update\User::one(1);
 if ($u->birthday->getValue() != '1989-07-21') {
   throw new Exception();
 }
@@ -141,7 +141,7 @@ if (!$u->save()) {
   throw new Exception();
 }
 
-$u = \M\Update\User::one(1);
+$u = \Model\Update\User::one(1);
 if ($u->birthday->getValue() != $date) {
   throw new Exception();
 }
@@ -151,7 +151,7 @@ if (!$u->save()) {
   throw new Exception(\M\Model::getLastLog());
 }
 
-$u = \M\Update\User::one(1);
+$u = \Model\Update\User::one(1);
 if ($u->birthday->getValue() != $date) {
   throw new Exception();
 }
@@ -161,7 +161,7 @@ if (!$u->save()) {
   throw new Exception(\M\Model::getLastLog());
 }
 
-$u = \M\Update\User::one(1);
+$u = \Model\Update\User::one(1);
 if ($u->birthday->getValue() != '1989-07-21') {
   throw new Exception();
 }
@@ -171,7 +171,7 @@ if (!$u->save()) {
   throw new Exception(\M\Model::getLastLog());
 }
 
-$u = \M\Update\User::one(1);
+$u = \Model\Update\User::one(1);
 if ($u->birthday->getValue() != null) {
   throw new Exception();
 }

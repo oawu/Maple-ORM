@@ -22,16 +22,16 @@ final class DateTime extends Plugin {
     self::TYPE_DATETIME => '0000-00-00 00:00:00',
   ];
 
-  private string $_type;
-  private string $_format;
-  private ?\DateTime $_datetime;
-
   public static function allowTypes(): array {
     return ['datetime', 'timestamp', 'date', 'time'];
   }
   public static function formatByType(string $type): string {
     return self::FORMAT[$type] ?? self::FORMAT[self::TYPE_DATETIME];
   }
+
+  private string $_type;
+  private string $_format;
+  private ?\DateTime $_datetime;
 
   public function __construct(?Model $model, Column $column, $value, ?callable $func = null) {
     $type = $column->getType();

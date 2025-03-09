@@ -7,6 +7,9 @@ use \M\Core\Connection;
 
 abstract class Helper {
 
+  public static function version() {
+    return '9.0.0';
+  }
   public static function attrsToStrings(string $type, $val) {
     if ($type == 'json') {
       return $val === null ? null : json_encode($val);

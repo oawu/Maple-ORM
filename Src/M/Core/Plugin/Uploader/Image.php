@@ -17,8 +17,6 @@ final class Image extends Uploader {
 
   private static $_thumbnailFunc = null;
 
-  private array $_versions = [];
-
   public static function setThumbnail(callable $func): void {
     self::$_thumbnailFunc = $func;
   }
@@ -28,6 +26,8 @@ final class Image extends Uploader {
     }
     return self::$_thumbnailFunc;
   }
+
+  private array $_versions = [];
 
   public function __construct(?Model $model, Column $column, ?string $value, ?callable $func = null) {
     parent::__construct($model, $column, $value, $func, [

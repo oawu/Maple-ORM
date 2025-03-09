@@ -14,20 +14,20 @@ if ($error = \M\Core\Connection::instance()->runQuery($sql)) {
 }
 
 $errors = null;
-$user = \M\Helper::transaction(null, static function() { return \M\Transaction\User::create() ?: \M\Helper::rollback(); }, $errors);
+$user = \M\Helper::transaction(null, static function() { return \Model\Transaction\User::create() ?: \M\Helper::rollback(); }, $errors);
 if (!($user === null && $errors && $errors[0] == '實體 Model 時發生錯誤，錯誤原因：欄位「name」不可以為 NULL')) {
   throw new Exception();
 }
 
 $errors = null;
-$user = \M\Helper::transaction(null, static function() { return \M\Transaction\User::create(['name' => 'OA']) ?: \M\Helper::rollback(); }, $errors);
+$user = \M\Helper::transaction(null, static function() { return \Model\Transaction\User::create(['name' => 'OA']) ?: \M\Helper::rollback(); }, $errors);
 if (!($user !== null && $errors === null)) {
   throw new Exception();
 }
 
 $errors = null;
 $user = \M\Helper::transaction(null, static function() {
-  \M\Transaction\User::create(['name' => 'OA']);
+  \Model\Transaction\User::create(['name' => 'OA']);
   throw new \Exception('Error');
 }, $errors);
 if (!($user === null && $errors && $errors[0] == 'Error')) {
@@ -35,22 +35,22 @@ if (!($user === null && $errors && $errors[0] == 'Error')) {
 }
 
 $errors = null;
-$user = \M\Helper::transaction(null, static function() { return !\M\Transaction\User::create(['name' => 'OA']); }, $errors);
+$user = \M\Helper::transaction(null, static function() { return !\Model\Transaction\User::create(['name' => 'OA']); }, $errors);
 if (!($errors && $errors[0] == 'transaction 回傳 false，故 rollback')) {
   throw new Exception();
 }
 
 $errors = null;
-$user = \M\Helper::transaction(null, static function() { return \M\Transaction\User::create(['name' => 'OB']) ?: \M\Helper::rollback(); }, $errors);
+$user = \M\Helper::transaction(null, static function() { return \Model\Transaction\User::create(['name' => 'OB']) ?: \M\Helper::rollback(); }, $errors);
 if (!($user !== null && $errors === null)) {
   throw new Exception();
 }
-if (\M\Transaction\User::count() != 2) {
+if (\Model\Transaction\User::count() != 2) {
   throw new Exception();
 }
-if (\M\Transaction\User::one()->id != 1) {
+if (\Model\Transaction\User::one()->id != 1) {
   throw new Exception();
 }
-if (\M\Transaction\User::last()->id != 4) {
+if (\Model\Transaction\User::last()->id != 4) {
   throw new Exception();
 }

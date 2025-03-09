@@ -1,6 +1,6 @@
 <?php
 
-namespace M\ReadWrite;
+namespace Model\ReadWrite;
 
 use M\Model;
 

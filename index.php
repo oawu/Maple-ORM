@@ -22,5 +22,9 @@ include PATH . 'Model.php';
 // 設定 Model Config
 include PATH . 'Config.php';
 
+echo \M\Helper::version();
+echo "\n";
+
 // 測試
 include PATH . 'Test.php';
+

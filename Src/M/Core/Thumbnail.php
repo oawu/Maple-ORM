@@ -24,13 +24,6 @@ abstract class Thumbnail {
     'heic' => ['image/heic', 'image/heif'],
   ];
 
-  private $_image = null;
-  private string $_path = '';
-  private string $_mime = '';
-  private string $_extension = '';
-  private array $_dimension = [];
-  private bool $_isDirty = false;
-
   public static function create(string $path, array $options = []) { // php8 -> return static
     return new static($path, $options);
   }
@@ -165,6 +158,13 @@ abstract class Thumbnail {
 
     return $_extensions[$mime] = null;
   }
+
+  private $_image = null;
+  private string $_path = '';
+  private string $_mime = '';
+  private string $_extension = '';
+  private array $_dimension = [];
+  private bool $_isDirty = false;
 
   public function __construct($path) {
     if (!function_exists('mime_content_type')) {

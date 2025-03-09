@@ -11,13 +11,13 @@ abstract class Plugin {
   abstract public function __toString(): string;
   abstract public static function allowTypes(): array;
 
-  private $_value; // null | any
-  private ?Model $_model = null; // Model
-  private Column $_column; // Column
-
   static public function create(...$args): object { // php8 -> return static
     return new static(...$args);
   }
+
+  private $_value; // null | any
+  private ?Model $_model = null; // Model
+  private Column $_column; // Column
 
   public function __construct(?Model $model, Column $column, $value) {
     $this->_model = $model;

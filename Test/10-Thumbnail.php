@@ -1,6 +1,6 @@
 <?php
 
-use M\Core\Plugin\Uploader\Image;
+use \M\Core\Plugin\Uploader\Image;
 use \M\Core\Thumbnail\Imagick;
 use \M\Core\Thumbnail\Gd;
 

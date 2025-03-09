@@ -1,24 +1,38 @@
 <?php
 
-spl_autoload_register(static function($_class): void {
+$namespaceReplace = 'M';
+$src = dirname(__FILE__, 1) . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR . 'M' . DIRECTORY_SEPARATOR;
+
+spl_autoload_register(static function($_class) use ($namespaceReplace, $src): void {
   if (class_exists($_class)) {
     return;
   }
-
-  $namespaces = array_slice(explode('\\', $_class), 0, -1);
+  $tokens = explode('\\', $_class);
+  $namespaces = array_slice($tokens, 0, -1);
   if (!$namespaces) {
     return;
   }
 
   $namespace = array_shift($namespaces);
+  $class = $tokens[count($tokens) - 1];
+
+  $realClass = '';
+  if ($namespaceReplace !== 'M' && $namespaceReplace !== '' && $namespace === $namespaceReplace) {
+    $namespace = 'M';
+    $realClass = 'M\\' . ($namespaces ? implode('\\', $namespaces) . '\\' : '') . $class;
+  }
+
   if ($namespace !== 'M') {
     return;
   }
 
-  $class = end(explode('\\', $_class));
-  $path = dirname(__FILE__, 1) . DIRECTORY_SEPARATOR . 'Src' . DIRECTORY_SEPARATOR . 'M' . ($namespaces ? DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $namespaces) : '') . DIRECTORY_SEPARATOR . $class . '.php';
+  $path = $src . ($namespaces ? implode(DIRECTORY_SEPARATOR, $namespaces) . DIRECTORY_SEPARATOR : '') . $class . '.php';
 
   if (is_file($path) && is_readable($path)) {
     include_once $path;
+  }
+
+  if ($realClass !== '' && class_exists($realClass) && !class_exists($_class)) {
+    class_alias($realClass, $_class);
   }
 });

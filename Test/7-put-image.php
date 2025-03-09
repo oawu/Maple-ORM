@@ -29,8 +29,8 @@ function resetImage($path1, $path2) {
     throw new Exception();
   }
 
-  \M\Image\User::truncate();
-  return \M\Image\User::create();
+  \Model\Image\User::truncate();
+  return \Model\Image\User::create();
 }
 
 $u = resetImage($path1, $path2);
@@ -43,12 +43,12 @@ if ($u->avatar2->getValue() !== '') {
 }
 
 $u->avatar1 = $path1;
-if (\M\Image\User::one()->avatar1->getValue() !== null) {
+if (\Model\Image\User::one()->avatar1->getValue() !== null) {
   throw new Exception();
 }
 
 $u->avatar2 = $path2;
-if (\M\Image\User::one()->avatar2->getValue() !== '') {
+if (\Model\Image\User::one()->avatar2->getValue() !== '') {
   throw new Exception();
 }
 
@@ -56,10 +56,10 @@ if ($u->save() === null) {
   throw new Exception();
 }
 
-if (\M\Image\User::one()->avatar1->getValue() === null) {
+if (\Model\Image\User::one()->avatar1->getValue() === null) {
   throw new Exception();
 }
-if (\M\Image\User::one()->avatar2->getValue() === '') {
+if (\Model\Image\User::one()->avatar2->getValue() === '') {
   throw new Exception();
 }
 
@@ -74,13 +74,13 @@ if ($u->avatar2->getValue() !== '') {
 
 $u->avatar1 = $path1;
 $u->save();
-if (\M\Image\User::one()->avatar1->getValue() === null) {
+if (\Model\Image\User::one()->avatar1->getValue() === null) {
   throw new Exception();
 }
 
 $u->avatar2 = $path2;
 $u->save();
-if (\M\Image\User::one()->avatar2->getValue() === '') {
+if (\Model\Image\User::one()->avatar2->getValue() === '') {
   throw new Exception();
 }
 
@@ -105,7 +105,7 @@ $u->save();
 
 $u->avatar1 = '';
 
-if (\M\Image\User::one()->avatar1->getValue() === null) {
+if (\Model\Image\User::one()->avatar1->getValue() === null) {
   throw new Exception();
 }
 
@@ -114,19 +114,19 @@ $u->save();
 
 $u->avatar2 = '';
 
-if (\M\Image\User::one()->avatar2->getValue() === '') {
+if (\Model\Image\User::one()->avatar2->getValue() === '') {
   throw new Exception();
 }
 
 $u->avatar1 = '';
 $u->save();
 
-if (\M\Image\User::one()->avatar1->getValue() !== null) {
+if (\Model\Image\User::one()->avatar1->getValue() !== null) {
   throw new Exception();
 }
 
 $u->avatar2 = '';
 $u->save();
-if (\M\Image\User::one()->avatar2->getValue() !== '') {
+if (\Model\Image\User::one()->avatar2->getValue() !== '') {
   throw new Exception();
 }

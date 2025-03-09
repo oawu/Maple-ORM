@@ -1,6 +1,6 @@
 <?php
 
-namespace M\Update;
+namespace Model\Update;
 
 use M\Model;
 

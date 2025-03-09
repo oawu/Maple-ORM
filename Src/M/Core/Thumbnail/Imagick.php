@@ -5,10 +5,6 @@ namespace M\Core\Thumbnail;
 use \M\Core\Thumbnail;
 
 final class Imagick extends Thumbnail {
-  private array $_options = [
-    'resizeUp' => true,
-  ];
-
   protected static function _getAllows(): array {
     return ['gif', 'jpg', 'png', 'webp'];
   }
@@ -236,6 +232,10 @@ final class Imagick extends Thumbnail {
     $newImage->setFormat($extension);
     return $newImage->writeImages($desc, true);
   }
+
+  private array $_options = [
+    'resizeUp' => true,
+  ];
 
   public function __construct(string $path, array $options = []) {
     parent::__construct($path);

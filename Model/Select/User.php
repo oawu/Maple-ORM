@@ -1,6 +1,6 @@
 <?php
 
-namespace M\Select;
+namespace Model\Select;
 
 use M\Model;
 

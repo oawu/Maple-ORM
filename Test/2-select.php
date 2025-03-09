@@ -25,193 +25,193 @@ if ($error = \M\Core\Connection::instance()->runQuery($sql)) {
   throw $error;
 }
 
-\M\Select\User::creates([
+\Model\Select\User::creates([
   ['name' => 'OA', 'bio' => 'Test', 'sex' => 'boy', 'birthday' => '1989-07-21', 'height' => '171.1', 'weight' => '79.8', 'info' => ['a' => 'a1', 'b' => [1, 2, 3]]],
   ['name' => 'OB', 'bio' => 'Test', 'sex' => 'girl', 'birthday' => '1989-03-19', 'height' => '151.1', 'weight' => '45', 'info' => null],
   ['name' => 'OC', 'bio' => 'Hi!', 'sex' => 'boy', 'birthday' => '2000-03-29', 'height' => '155.1', 'weight' => '47.1', 'info' => 'null'],
 ]);
 
-if (\M\Select\User::one()->name != 'OA') {
+if (\Model\Select\User::one()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::one(2)->name != 'OB') {
+if (\Model\Select\User::one(2)->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::one('2')->name != 'OB') {
+if (\Model\Select\User::one('2')->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where(2)->one()->name != 'OB') {
+if (\Model\Select\User::where(2)->one()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where('2')->one()->name != 'OB') {
+if (\Model\Select\User::where('2')->one()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where([2, 3])->one()->name != 'OB') {
+if (\Model\Select\User::where([2, 3])->one()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', 2)->one()->name != 'OB') {
+if (\Model\Select\User::where('id', 2)->one()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '=', 2)->one()->name != 'OB') {
+if (\Model\Select\User::where('id', '=', 2)->one()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '>', 2)->one()->name != 'OC') {
+if (\Model\Select\User::where('id', '>', 2)->one()->name != 'OC') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '<', 2)->one()->name != 'OA') {
+if (\Model\Select\User::where('id', '<', 2)->one()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', [2, 3])->one()->name != 'OB') {
+if (\Model\Select\User::where('id', [2, 3])->one()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::whereIn('id', [2, 3])->orWhere(1)->one()->name != 'OA') {
+if (\Model\Select\User::whereIn('id', [2, 3])->orWhere(1)->one()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::in('id', [2, 3])->or(1)->one()->name != 'OA') {
+if (\Model\Select\User::in('id', [2, 3])->or(1)->one()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::whereIn('id', [2, 3])->or(1)->one()->name != 'OA') {
+if (\Model\Select\User::whereIn('id', [2, 3])->or(1)->one()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::whereNotIn('id', [2, 3])->one()->name != 'OA') {
+if (\Model\Select\User::whereNotIn('id', [2, 3])->one()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '>', 1)->where('id', '<', 3)->one()->name != 'OB') {
+if (\Model\Select\User::where('id', '>', 1)->where('id', '<', 3)->one()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '>', 2)->orWhere('id', '<', 2)->one()->name != 'OA') {
+if (\Model\Select\User::where('id', '>', 2)->orWhere('id', '<', 2)->one()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '>', 2)->or('id', '<', 2)->one()->name != 'OA') {
+if (\Model\Select\User::where('id', '>', 2)->or('id', '<', 2)->one()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::whereBetween('id', 2, 3)->one()->name != 'OB') {
-  throw new Exception();
-}
-
-if (\M\Select\User::first()->name != 'OA') {
-  throw new Exception();
-}
-if (\M\Select\User::first(2)->name != 'OB') {
-  throw new Exception();
-}
-if (\M\Select\User::first('2')->name != 'OB') {
-  throw new Exception();
-}
-if (\M\Select\User::where(2)->first()->name != 'OB') {
-  throw new Exception();
-}
-if (\M\Select\User::where('2')->first()->name != 'OB') {
-  throw new Exception();
-}
-if (\M\Select\User::where([2, 3])->first()->name != 'OB') {
-  throw new Exception();
-}
-if (\M\Select\User::where('id', 2)->first()->name != 'OB') {
-  throw new Exception();
-}
-if (\M\Select\User::where('id', '=', 2)->first()->name != 'OB') {
-  throw new Exception();
-}
-if (\M\Select\User::where('id', '>', 2)->first()->name != 'OC') {
-  throw new Exception();
-}
-if (\M\Select\User::where('id', '<', 2)->first()->name != 'OA') {
-  throw new Exception();
-}
-if (\M\Select\User::where('id', [2, 3])->first()->name != 'OB') {
-  throw new Exception();
-}
-if (\M\Select\User::where('id', 'in', [2, 3])->first()->name != 'OB') {
-  throw new Exception();
-}
-if (\M\Select\User::whereIn('id', [2, 3])->orWhere(1)->first()->name != 'OA') {
-  throw new Exception();
-}
-if (\M\Select\User::in('id', [2, 3])->or(1)->first()->name != 'OA') {
-  throw new Exception();
-}
-if (\M\Select\User::whereIn('id', [2, 3])->or(1)->first()->name != 'OA') {
-  throw new Exception();
-}
-if (\M\Select\User::whereNotIn('id', [2, 3])->first()->name != 'OA') {
-  throw new Exception();
-}
-if (\M\Select\User::where('id', '>', 1)->where('id', '<', 3)->first()->name != 'OB') {
-  throw new Exception();
-}
-if (\M\Select\User::where('id', '>', 2)->orWhere('id', '<', 2)->first()->name != 'OA') {
-  throw new Exception();
-}
-if (\M\Select\User::where('id', '>', 2)->or('id', '<', 2)->first()->name != 'OA') {
-  throw new Exception();
-}
-if (\M\Select\User::whereBetween('id', 2, 3)->first()->name != 'OB') {
+if (\Model\Select\User::whereBetween('id', 2, 3)->one()->name != 'OB') {
   throw new Exception();
 }
 
-if (\M\Select\User::last()->name != 'OC') {
+if (\Model\Select\User::first()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::last(2)->name != 'OB') {
+if (\Model\Select\User::first(2)->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::last('2')->name != 'OB') {
+if (\Model\Select\User::first('2')->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where(2)->last()->name != 'OB') {
+if (\Model\Select\User::where(2)->first()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where('2')->last()->name != 'OB') {
+if (\Model\Select\User::where('2')->first()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where([2, 3])->last()->name != 'OC') {
+if (\Model\Select\User::where([2, 3])->first()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', 2)->last()->name != 'OB') {
+if (\Model\Select\User::where('id', 2)->first()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '=', 2)->last()->name != 'OB') {
+if (\Model\Select\User::where('id', '=', 2)->first()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '>', 2)->last()->name != 'OC') {
+if (\Model\Select\User::where('id', '>', 2)->first()->name != 'OC') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '<', 2)->last()->name != 'OA') {
+if (\Model\Select\User::where('id', '<', 2)->first()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', [2, 3])->last()->name != 'OC') {
+if (\Model\Select\User::where('id', [2, 3])->first()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', 'in', [2, 3])->last()->name != 'OC') {
+if (\Model\Select\User::where('id', 'in', [2, 3])->first()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::whereIn('id', [2, 3])->orWhere(1)->last()->name != 'OC') {
+if (\Model\Select\User::whereIn('id', [2, 3])->orWhere(1)->first()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::in('id', [2, 3])->or(1)->last()->name != 'OC') {
+if (\Model\Select\User::in('id', [2, 3])->or(1)->first()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::whereIn('id', [2, 3])->or(1)->last()->name != 'OC') {
+if (\Model\Select\User::whereIn('id', [2, 3])->or(1)->first()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::whereNotIn('id', [2, 3])->last()->name != 'OA') {
+if (\Model\Select\User::whereNotIn('id', [2, 3])->first()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '>', 1)->where('id', '<', 3)->last()->name != 'OB') {
+if (\Model\Select\User::where('id', '>', 1)->where('id', '<', 3)->first()->name != 'OB') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '>', 2)->orWhere('id', '<', 2)->last()->name != 'OC') {
+if (\Model\Select\User::where('id', '>', 2)->orWhere('id', '<', 2)->first()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '>', 2)->or('id', '<', 2)->last()->name != 'OC') {
+if (\Model\Select\User::where('id', '>', 2)->or('id', '<', 2)->first()->name != 'OA') {
   throw new Exception();
 }
-if (\M\Select\User::whereBetween('id', 1, 2)->last()->name != 'OB') {
+if (\Model\Select\User::whereBetween('id', 2, 3)->first()->name != 'OB') {
   throw new Exception();
 }
 
-$user = \M\Select\User::select('id', 'name')->one();
+if (\Model\Select\User::last()->name != 'OC') {
+  throw new Exception();
+}
+if (\Model\Select\User::last(2)->name != 'OB') {
+  throw new Exception();
+}
+if (\Model\Select\User::last('2')->name != 'OB') {
+  throw new Exception();
+}
+if (\Model\Select\User::where(2)->last()->name != 'OB') {
+  throw new Exception();
+}
+if (\Model\Select\User::where('2')->last()->name != 'OB') {
+  throw new Exception();
+}
+if (\Model\Select\User::where([2, 3])->last()->name != 'OC') {
+  throw new Exception();
+}
+if (\Model\Select\User::where('id', 2)->last()->name != 'OB') {
+  throw new Exception();
+}
+if (\Model\Select\User::where('id', '=', 2)->last()->name != 'OB') {
+  throw new Exception();
+}
+if (\Model\Select\User::where('id', '>', 2)->last()->name != 'OC') {
+  throw new Exception();
+}
+if (\Model\Select\User::where('id', '<', 2)->last()->name != 'OA') {
+  throw new Exception();
+}
+if (\Model\Select\User::where('id', [2, 3])->last()->name != 'OC') {
+  throw new Exception();
+}
+if (\Model\Select\User::where('id', 'in', [2, 3])->last()->name != 'OC') {
+  throw new Exception();
+}
+if (\Model\Select\User::whereIn('id', [2, 3])->orWhere(1)->last()->name != 'OC') {
+  throw new Exception();
+}
+if (\Model\Select\User::in('id', [2, 3])->or(1)->last()->name != 'OC') {
+  throw new Exception();
+}
+if (\Model\Select\User::whereIn('id', [2, 3])->or(1)->last()->name != 'OC') {
+  throw new Exception();
+}
+if (\Model\Select\User::whereNotIn('id', [2, 3])->last()->name != 'OA') {
+  throw new Exception();
+}
+if (\Model\Select\User::where('id', '>', 1)->where('id', '<', 3)->last()->name != 'OB') {
+  throw new Exception();
+}
+if (\Model\Select\User::where('id', '>', 2)->orWhere('id', '<', 2)->last()->name != 'OC') {
+  throw new Exception();
+}
+if (\Model\Select\User::where('id', '>', 2)->or('id', '<', 2)->last()->name != 'OC') {
+  throw new Exception();
+}
+if (\Model\Select\User::whereBetween('id', 1, 2)->last()->name != 'OB') {
+  throw new Exception();
+}
+
+$user = \Model\Select\User::select('id', 'name')->one();
 if ($user->id != 1) {
   throw new Exception();
 }
@@ -222,7 +222,7 @@ if ($user->bio !== null) {
   throw new Exception();
 }
 
-$user = \M\Select\User::select('id, name')->one();
+$user = \Model\Select\User::select('id, name')->one();
 if ($user->id != 1) {
   throw new Exception();
 }
@@ -233,7 +233,7 @@ if ($user->bio !== null) {
   throw new Exception();
 }
 
-$user = \M\Select\User::select('id as i', 'name as n')->one();
+$user = \Model\Select\User::select('id as i', 'name as n')->one();
 if ($user->i != 1) {
   throw new Exception();
 }
@@ -244,7 +244,7 @@ if ($user->bio !== null) {
   throw new Exception();
 }
 
-$user = \M\Select\User::select('id, name', 'bio', 'height as h')->one();
+$user = \Model\Select\User::select('id, name', 'bio', 'height as h')->one();
 if ($user->id != 1) {
   throw new Exception();
 }
@@ -261,27 +261,27 @@ if ($user->weight !== null) {
   throw new Exception();
 }
 
-if (\M\Select\User::limit(2)->last()->id != 3) {
+if (\Model\Select\User::limit(2)->last()->id != 3) {
   throw new Exception();
 }
-if (\M\Select\User::offset(1)->limit(2)->last()->id != 2) {
+if (\Model\Select\User::offset(1)->limit(2)->last()->id != 2) {
   throw new Exception();
 }
-if (\M\Select\User::offset(1)->last()->id != 2) {
-  throw new Exception();
-}
-
-if (count(\M\Select\User::limit(2)->all()) != 2) {
-  throw new Exception();
-}
-if (count(\M\Select\User::limit(2)->offset(2)->all()) != 1) {
-  throw new Exception();
-}
-if (count(\M\Select\User::offset(1)->all()) != 3) {
+if (\Model\Select\User::offset(1)->last()->id != 2) {
   throw new Exception();
 }
 
-$users = \M\Select\User::byKey('bio')->all();
+if (count(\Model\Select\User::limit(2)->all()) != 2) {
+  throw new Exception();
+}
+if (count(\Model\Select\User::limit(2)->offset(2)->all()) != 1) {
+  throw new Exception();
+}
+if (count(\Model\Select\User::offset(1)->all()) != 3) {
+  throw new Exception();
+}
+
+$users = \Model\Select\User::byKey('bio')->all();
 if (count($users) != 2) {
   throw new Exception();
 }
@@ -292,15 +292,15 @@ if (count($users['Hi!']) != 1) {
   throw new Exception();
 }
 
-if (\M\Select\User::where('id', '>', 1)->count() != 2) {
+if (\Model\Select\User::where('id', '>', 1)->count() != 2) {
   throw new Exception();
 }
-if (\M\Select\User::where('id', '>', 10)->count() != 0) {
+if (\Model\Select\User::where('id', '>', 10)->count() != 0) {
   throw new Exception();
 }
 
 
-$users = \M\Select\User::where('id', '>', 2)->all();
+$users = \Model\Select\User::where('id', '>', 2)->all();
 
 if (count($users) != 1) {
   throw new Exception();
@@ -313,7 +313,7 @@ if ($user->id != 3) {
   throw new Exception();
 }
 
-$users = \M\Select\User::order('id DESC')->all();
+$users = \Model\Select\User::order('id DESC')->all();
 if ($users[0]->id != 3) {
   throw new Exception();
 }

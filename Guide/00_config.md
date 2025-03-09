@@ -28,10 +28,10 @@
 ```
 
 ## 指定 Model 放置的目錄
-放置對應資料庫的 Model 目錄，方式如下
+放置對應資料庫的 Model 目錄，第一個參數代表 namespace，第二個參數代表目錄路徑，方式如下
 
 ```php
-\M\Model::setDir('/path/.../models/');
+\M\Model::setDir('M', '/path/.../models/');
 ```
 
 ## 專案 Model 的命名規則

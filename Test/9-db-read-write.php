@@ -2,8 +2,8 @@
 
 include '0.php';
 
-use M\ReadWrite\User;
-use M\ReadWrite\Book;
+use \Model\ReadWrite\User;
+use \Model\ReadWrite\Book;
 
 $sql = "
   CREATE TABLE `ReadWriteUser` (
@@ -45,127 +45,127 @@ if ($error = \M\Core\Connection::instance('W')->runQuery($sql)) {
 }
 
 
-// $userRs = User::db('R')->where([1, 3])->all();
-// $userWs = User::db('W')->where([1, 2])->all();
+$userRs = User::db('R')->where([1, 3])->all();
+$userWs = User::db('W')->where([1, 2])->all();
 
-// $ids = [];
-// foreach ($userRs as $user) {
-//   $ids[] = $user->id;
-//   $ids[] = $user->name;
-//   $ids[] = $user->book1->id;
-//   $ids[] = $user->book1->title;
+$ids = [];
+foreach ($userRs as $user) {
+  $ids[] = $user->id;
+  $ids[] = $user->name;
+  $ids[] = $user->book1->id;
+  $ids[] = $user->book1->title;
 
-//   foreach ($user->book1s as $book) {
-//     $ids[] = $book->id;
-//     $ids[] = $book->title;
-//   }
-// }
-// $ids[] = '';
-// foreach ($userWs as $user) {
-//   $ids[] = $user->id;
-//   $ids[] = $user->name;
-//   $ids[] = $user->book1->id;
-//   $ids[] = $user->book1->title;
+  foreach ($user->book1s as $book) {
+    $ids[] = $book->id;
+    $ids[] = $book->title;
+  }
+}
+$ids[] = '';
+foreach ($userWs as $user) {
+  $ids[] = $user->id;
+  $ids[] = $user->name;
+  $ids[] = $user->book1->id;
+  $ids[] = $user->book1->title;
 
-//   foreach ($user->book1s as $book) {
-//     $ids[] = $book->id;
-//     $ids[] = $book->title;
-//   }
-// }
-// if (md5(json_encode($ids)) != '20edceb41915aac7d1416ed8238b3f8d') {
-//   throw new Exception();
-// }
+  foreach ($user->book1s as $book) {
+    $ids[] = $book->id;
+    $ids[] = $book->title;
+  }
+}
+if (md5(json_encode($ids)) != '20edceb41915aac7d1416ed8238b3f8d') {
+  throw new Exception();
+}
 
-// $userRs = User::db('R')->relation('book1', 'book1s')->where([1, 3])->all();
-// $userWs = User::db('W')->relation('book1', 'book1s')->where([1, 2])->all();
+$userRs = User::db('R')->relation('book1', 'book1s')->where([1, 3])->all();
+$userWs = User::db('W')->relation('book1', 'book1s')->where([1, 2])->all();
 
-// $ids = [];
-// foreach ($userRs as $user) {
-//   $ids[] = $user->id;
-//   $ids[] = $user->name;
-//   $ids[] = $user->book1->id;
-//   $ids[] = $user->book1->title;
+$ids = [];
+foreach ($userRs as $user) {
+  $ids[] = $user->id;
+  $ids[] = $user->name;
+  $ids[] = $user->book1->id;
+  $ids[] = $user->book1->title;
 
-//   foreach ($user->book1s as $book) {
-//     $ids[] = $book->id;
-//     $ids[] = $book->title;
-//   }
-// }
-// $ids[] = '';
-// foreach ($userWs as $user) {
-//   $ids[] = $user->id;
-//   $ids[] = $user->name;
-//   $ids[] = $user->book1->id;
-//   $ids[] = $user->book1->title;
+  foreach ($user->book1s as $book) {
+    $ids[] = $book->id;
+    $ids[] = $book->title;
+  }
+}
+$ids[] = '';
+foreach ($userWs as $user) {
+  $ids[] = $user->id;
+  $ids[] = $user->name;
+  $ids[] = $user->book1->id;
+  $ids[] = $user->book1->title;
 
-//   foreach ($user->book1s as $book) {
-//     $ids[] = $book->id;
-//     $ids[] = $book->title;
-//   }
-// }
-// if (md5(json_encode($ids)) != '20edceb41915aac7d1416ed8238b3f8d') {
-//   throw new Exception();
-// }
+  foreach ($user->book1s as $book) {
+    $ids[] = $book->id;
+    $ids[] = $book->title;
+  }
+}
+if (md5(json_encode($ids)) != '20edceb41915aac7d1416ed8238b3f8d') {
+  throw new Exception();
+}
 
-// $userRs = User::db('R')->where([1, 3])->all();
-// $userWs = User::db('W')->where([1, 2])->all();
+$userRs = User::db('R')->where([1, 3])->all();
+$userWs = User::db('W')->where([1, 2])->all();
 
-// $ids = [];
-// foreach ($userRs as $user) {
-//   $ids[] = $user->id;
-//   $ids[] = $user->name;
-//   $ids[] = $user->book2->id;
-//   $ids[] = $user->book2->title;
-//   foreach ($user->book2s as $book) {
-//     $ids[] = $book->id;
-//     $ids[] = $book->title;
-//   }
-// }
-// $ids[] = '';
-// foreach ($userWs as $user) {
-//   $ids[] = $user->id;
-//   $ids[] = $user->name;
-//   $ids[] = $user->book2->id;
-//   $ids[] = $user->book2->title;
+$ids = [];
+foreach ($userRs as $user) {
+  $ids[] = $user->id;
+  $ids[] = $user->name;
+  $ids[] = $user->book2->id;
+  $ids[] = $user->book2->title;
+  foreach ($user->book2s as $book) {
+    $ids[] = $book->id;
+    $ids[] = $book->title;
+  }
+}
+$ids[] = '';
+foreach ($userWs as $user) {
+  $ids[] = $user->id;
+  $ids[] = $user->name;
+  $ids[] = $user->book2->id;
+  $ids[] = $user->book2->title;
 
-//   foreach ($user->book2s as $book) {
-//     $ids[] = $book->id;
-//     $ids[] = $book->title;
-//   }
-// }
-// if (md5(json_encode($ids)) != 'ecb60dc4be806b474d455b695561a485') {
-//   throw new Exception();
-// }
+  foreach ($user->book2s as $book) {
+    $ids[] = $book->id;
+    $ids[] = $book->title;
+  }
+}
+if (md5(json_encode($ids)) != 'ecb60dc4be806b474d455b695561a485') {
+  throw new Exception();
+}
 
-// $userRs = User::db('R')->relation('book2', 'book2s')->where([1, 3])->all();
-// $userWs = User::db('W')->relation('book2', 'book2s')->where([1, 2])->all();
+$userRs = User::db('R')->relation('book2', 'book2s')->where([1, 3])->all();
+$userWs = User::db('W')->relation('book2', 'book2s')->where([1, 2])->all();
 
-// $ids = [];
-// foreach ($userRs as $user) {
-//   $ids[] = $user->id;
-//   $ids[] = $user->name;
-//   $ids[] = $user->book2->id;
-//   $ids[] = $user->book2->title;
-//   foreach ($user->book2s as $book) {
-//     $ids[] = $book->id;
-//     $ids[] = $book->title;
-//   }
-// }
-// $ids[] = '';
-// foreach ($userWs as $user) {
-//   $ids[] = $user->id;
-//   $ids[] = $user->name;
-//   $ids[] = $user->book2->id;
-//   $ids[] = $user->book2->title;
+$ids = [];
+foreach ($userRs as $user) {
+  $ids[] = $user->id;
+  $ids[] = $user->name;
+  $ids[] = $user->book2->id;
+  $ids[] = $user->book2->title;
+  foreach ($user->book2s as $book) {
+    $ids[] = $book->id;
+    $ids[] = $book->title;
+  }
+}
+$ids[] = '';
+foreach ($userWs as $user) {
+  $ids[] = $user->id;
+  $ids[] = $user->name;
+  $ids[] = $user->book2->id;
+  $ids[] = $user->book2->title;
 
-//   foreach ($user->book2s as $book) {
-//     $ids[] = $book->id;
-//     $ids[] = $book->title;
-//   }
-// }
-// if (md5(json_encode($ids)) != 'ecb60dc4be806b474d455b695561a485') {
-//   throw new Exception();
-// }
+  foreach ($user->book2s as $book) {
+    $ids[] = $book->id;
+    $ids[] = $book->title;
+  }
+}
+if (md5(json_encode($ids)) != 'ecb60dc4be806b474d455b695561a485') {
+  throw new Exception();
+}
 
 
 // ====================================================================

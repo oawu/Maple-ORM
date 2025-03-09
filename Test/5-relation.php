@@ -29,7 +29,7 @@ if ($error = \M\Core\Connection::instance()->runQuery($sql)) {
 
 function has() {
   // ========
-    $u = \M\Relation\User::one();
+    $u = \Model\Relation\User::one();
     if (count($u->articles) != 2) {
       throw new Exception();
     }
@@ -60,7 +60,7 @@ function has() {
       throw new Exception();
     }
 
-    $u = \M\Relation\User::one();
+    $u = \Model\Relation\User::one();
     if ($u->article->id != 2) {
       throw new Exception();
     }
@@ -89,7 +89,7 @@ function has() {
     }
 
 
-    $u = \M\Relation\User::last();
+    $u = \Model\Relation\User::last();
     if (count($u->articles) != 0) {
       throw new Exception();
     }
@@ -98,7 +98,7 @@ function has() {
     }
 
   // ========
-    $u = \M\Relation\User::one();
+    $u = \Model\Relation\User::one();
     if (count($u->article2s) != 1) {
       throw new Exception();
     }
@@ -123,7 +123,7 @@ function has() {
       throw new Exception();
     }
 
-    $u = \M\Relation\User::one();
+    $u = \Model\Relation\User::one();
     if ($u->article2->id != 3) {
       throw new Exception();
     }
@@ -146,7 +146,7 @@ function has() {
       throw new Exception();
     }
 
-    $u = \M\Relation\User::last();
+    $u = \Model\Relation\User::last();
     if (count($u->article2s) != 0) {
       throw new Exception();
     }
@@ -155,7 +155,7 @@ function has() {
     }
 
   // ========
-    $u = \M\Relation\User::one();
+    $u = \Model\Relation\User::one();
     if (count($u->article3s) != 1) {
       throw new Exception();
     }
@@ -184,7 +184,7 @@ function has() {
     }
 
 
-    $u = \M\Relation\User::one();
+    $u = \Model\Relation\User::one();
     if ($u->article3->id != 1) {
       throw new Exception();
     }
@@ -210,7 +210,7 @@ function has() {
     }
 
 
-    $u = \M\Relation\User::last();
+    $u = \Model\Relation\User::last();
     if (count($u->article3s) != 0) {
       throw new Exception();
     }
@@ -219,7 +219,7 @@ function has() {
     }
 
   // ========
-    $u = \M\Relation\User::one();
+    $u = \Model\Relation\User::one();
     if (count($u->article4s) != 1) {
       throw new Exception();
     }
@@ -251,7 +251,7 @@ function has() {
     }
 
 
-    $u = \M\Relation\User::one();
+    $u = \Model\Relation\User::one();
     if ($u->article4->id != 2) {
       throw new Exception();
     }
@@ -280,7 +280,7 @@ function has() {
     }
 
 
-    $u = \M\Relation\User::last();
+    $u = \Model\Relation\User::last();
     if (count($u->article4s) != 0) {
       throw new Exception();
     }
@@ -290,7 +290,7 @@ function has() {
 }
 function belongs() {
   // ========
-    $a = \M\Relation\Article::one();
+    $a = \Model\Relation\Article::one();
     if ($a->user === null) {
       throw new Exception();
     }
@@ -328,14 +328,14 @@ function belongs() {
       throw new Exception();
     }
 
-    $a = \M\Relation\Article::last();
+    $a = \Model\Relation\Article::last();
     if ($a->user !== null) {
       throw new Exception();
     }
 
     // ----------
 
-    $a = \M\Relation\Article::one();
+    $a = \Model\Relation\Article::one();
     if (count($a->users) != 1) {
       throw new Exception();
     }
@@ -389,12 +389,12 @@ function belongs() {
       throw new Exception();
     }
 
-    $a = \M\Relation\Article::last();
+    $a = \Model\Relation\Article::last();
     if ($a->users !== []) {
       throw new Exception();
     }
   // ========
-    $a = \M\Relation\Article::one();
+    $a = \Model\Relation\Article::one();
     if ($a->user2 === null) {
       throw new Exception();
     }
@@ -433,14 +433,14 @@ function belongs() {
       throw new Exception();
     }
 
-    $a = \M\Relation\Article::last();
+    $a = \Model\Relation\Article::last();
     if ($a->user2 !== null) {
       throw new Exception();
     }
 
     // ----------
 
-    $a = \M\Relation\Article::one();
+    $a = \Model\Relation\Article::one();
     if (count($a->user2s) != 1) {
       throw new Exception();
     }
@@ -493,12 +493,12 @@ function belongs() {
       throw new Exception();
     }
 
-    $a = \M\Relation\Article::last();
+    $a = \Model\Relation\Article::last();
     if ($a->user2s !== []) {
       throw new Exception();
     }
   // ========
-    $a = \M\Relation\Article::one();
+    $a = \Model\Relation\Article::one();
     if ($a->user4 === null) {
       throw new Exception();
     }
@@ -542,14 +542,14 @@ function belongs() {
       throw new Exception();
     }
 
-    $a = \M\Relation\Article::last();
+    $a = \Model\Relation\Article::last();
     if ($a->user4 !== null) {
       throw new Exception();
     }
 
     // // ----------
 
-    $a = \M\Relation\Article::one();
+    $a = \Model\Relation\Article::one();
     if (count($a->user4s) != 1) {
       throw new Exception();
     }
@@ -608,12 +608,12 @@ function belongs() {
       throw new Exception();
     }
 
-    $a = \M\Relation\Article::last();
+    $a = \Model\Relation\Article::last();
     if ($a->user4s !== []) {
       throw new Exception();
     }
   // ========
-    $a = \M\Relation\Article::one();
+    $a = \Model\Relation\Article::one();
     if ($a->user3 === null) {
       throw new Exception();
     }
@@ -658,14 +658,14 @@ function belongs() {
       throw new Exception();
     }
 
-    $a = \M\Relation\Article::last();
+    $a = \Model\Relation\Article::last();
     if ($a->user3 !== null) {
       throw new Exception();
     }
 
     // // ----------
 
-    $a = \M\Relation\Article::one();
+    $a = \Model\Relation\Article::one();
     if (count($a->user3s) != 2) {
       throw new Exception();
     }
@@ -724,14 +724,14 @@ function belongs() {
       throw new Exception();
     }
 
-    $a = \M\Relation\Article::last();
+    $a = \Model\Relation\Article::last();
     if ($a->user3s !== []) {
       throw new Exception();
     }
 }
 function hasMerge() {
     // ===
-    $users = \M\Relation\User::relation('article')->all();
+    $users = \Model\Relation\User::relation('article')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationArticle`.* FROM `RelationArticle` WHERE `RelationArticle`.`relationUserId` IN (?, ?, ?, ?, ?);' && $vals == [1, 2, 3, 4, 5]))
@@ -755,7 +755,7 @@ function hasMerge() {
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if ($sql == 'SELECT `RelationArticle`.* FROM `RelationArticle` WHERE `RelationArticle`.`relationUserId` IN (?, ?, ?, ?, ?);' && $vals == [1, 2, 3, 4, 5])
 
-    $users = \M\Relation\User::relation('articles')->all();
+    $users = \Model\Relation\User::relation('articles')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationArticle`.* FROM `RelationArticle` WHERE `RelationArticle`.`relationUserId` IN (?, ?, ?, ?, ?);' && $vals == [1, 2, 3, 4, 5]))
@@ -791,7 +791,7 @@ function hasMerge() {
       throw new Exception();
 
     // ===
-    $users = \M\Relation\User::relation('article2')->all();
+    $users = \Model\Relation\User::relation('article2')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationArticle`.* FROM `RelationArticle` WHERE `RelationArticle`.`aId` IN (?, ?, ?, ?, ?);' && $vals == [1, 2, 3, 4, 5]))
@@ -817,7 +817,7 @@ function hasMerge() {
     if (!($sql == 'SELECT `RelationArticle`.* FROM `RelationArticle` WHERE `RelationArticle`.`aId` IN (?, ?, ?, ?, ?);' && $vals == [1, 2, 3, 4, 5]))
       throw new Exception();
 
-    $users = \M\Relation\User::relation('article2s')->all();
+    $users = \Model\Relation\User::relation('article2s')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationArticle`.* FROM `RelationArticle` WHERE `RelationArticle`.`aId` IN (?, ?, ?, ?, ?);' && $vals == [1, 2, 3, 4, 5]))
@@ -853,7 +853,7 @@ function hasMerge() {
       throw new Exception();
 
     // ===
-    $users = \M\Relation\User::relation('article3')->all();
+    $users = \Model\Relation\User::relation('article3')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationArticle`.* FROM `RelationArticle` WHERE `RelationArticle`.`relationUserId` IN (?, ?, ?, ?);' && $vals == [2, 1, 3, 11]))
@@ -879,7 +879,7 @@ function hasMerge() {
     if (!($sql == 'SELECT `RelationArticle`.* FROM `RelationArticle` WHERE `RelationArticle`.`relationUserId` IN (?, ?, ?, ?);' && $vals == [2, 1, 3, 11]))
       throw new Exception();
 
-    $users = \M\Relation\User::relation('article3s')->all();
+    $users = \Model\Relation\User::relation('article3s')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationArticle`.* FROM `RelationArticle` WHERE `RelationArticle`.`relationUserId` IN (?, ?, ?, ?);' && $vals == [2, 1, 3, 11]))
@@ -920,7 +920,7 @@ function hasMerge() {
 
 
     // ===
-    $users = \M\Relation\User::relation('article4')->all();
+    $users = \Model\Relation\User::relation('article4')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationArticle`.* FROM `RelationArticle` WHERE `RelationArticle`.`aId` IN (?, ?, ?, ?);' && $vals == [2, 1, 3, 11]))
@@ -946,7 +946,7 @@ function hasMerge() {
     if (!($sql == 'SELECT `RelationArticle`.* FROM `RelationArticle` WHERE `RelationArticle`.`aId` IN (?, ?, ?, ?);' && $vals == [2, 1, 3, 11]))
       throw new Exception();
 
-    $users = \M\Relation\User::relation('article4s')->all();
+    $users = \Model\Relation\User::relation('article4s')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationArticle`.* FROM `RelationArticle` WHERE `RelationArticle`.`aId` IN (?, ?, ?, ?);' && $vals == [2, 1, 3, 11]))
@@ -986,7 +986,7 @@ function hasMerge() {
 }
 function belongsMerge() {
   // ===
-    $articles = \M\Relation\Article::relation('user')->all();
+    $articles = \Model\Relation\Article::relation('user')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationUser`.* FROM `RelationUser` WHERE `RelationUser`.`id` IN (?, ?, ?);' && $vals == [2, 1, 10]))
@@ -1010,7 +1010,7 @@ function belongsMerge() {
       throw new Exception();
 
 
-    $articles = \M\Relation\Article::relation('users')->all();
+    $articles = \Model\Relation\Article::relation('users')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationUser`.* FROM `RelationUser` WHERE `RelationUser`.`id` IN (?, ?, ?);' && $vals == [2, 1, 10]))
@@ -1044,7 +1044,7 @@ function belongsMerge() {
 
 
   // ===
-    $articles = \M\Relation\Article::relation('user2')->all();
+    $articles = \Model\Relation\Article::relation('user2')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationUser`.* FROM `RelationUser` WHERE `RelationUser`.`id` IN (?, ?, ?, ?);' && $vals == [3, 2, 1, 10]))
@@ -1068,7 +1068,7 @@ function belongsMerge() {
       throw new Exception();
 
 
-    $articles = \M\Relation\Article::relation('user2s')->all();
+    $articles = \Model\Relation\Article::relation('user2s')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationUser`.* FROM `RelationUser` WHERE `RelationUser`.`id` IN (?, ?, ?, ?);' && $vals == [3, 2, 1, 10]))
@@ -1102,7 +1102,7 @@ function belongsMerge() {
 
 
   // ===
-    $articles = \M\Relation\Article::relation('user3')->all();
+    $articles = \Model\Relation\Article::relation('user3')->all();
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
     if (!($sql == 'SELECT `RelationUser`.* FROM `RelationUser` WHERE `RelationUser`.`uId` IN (?, ?, ?);' && $vals == [2, 1, 10]))
@@ -1125,7 +1125,7 @@ function belongsMerge() {
     if (!($sql == 'SELECT `RelationUser`.* FROM `RelationUser` WHERE `RelationUser`.`uId` IN (?, ?, ?);' && $vals == [2, 1, 10]))
       throw new Exception();
 
-    $articles = \M\Relation\Article::relation('user3s')->all();
+    $articles = \Model\Relation\Article::relation('user3s')->all();
 
 
     ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
@@ -1164,7 +1164,7 @@ function belongsMerge() {
 
 
   // ===
-  $articles = \M\Relation\Article::relation('user4')->all();
+  $articles = \Model\Relation\Article::relation('user4')->all();
 
   ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
   if (!($sql == 'SELECT `RelationUser`.* FROM `RelationUser` WHERE `RelationUser`.`uId` IN (?, ?, ?, ?);' && $vals == [3, 2, 1, 10]))
@@ -1188,7 +1188,7 @@ function belongsMerge() {
     throw new Exception();
 
 
-  $articles = \M\Relation\Article::relation('user4s')->all();
+  $articles = \Model\Relation\Article::relation('user4s')->all();
 
   ['sql' => $sql, 'vals' => $vals] = \M\Model::getLastQueryLog();
   if (!($sql == 'SELECT `RelationUser`.* FROM `RelationUser` WHERE `RelationUser`.`uId` IN (?, ?, ?, ?);' && $vals == [3, 2, 1, 10]))
@@ -1225,16 +1225,16 @@ function belongsMerge() {
     throw new Exception();
 }
 function resetRelationDate() {
-  \M\Relation\User::truncate();
-  \M\Relation\User::creates([
+  \Model\Relation\User::truncate();
+  \Model\Relation\User::creates([
     ['uId' => 2, 'name' => 'OA'],
     ['uId' => 1, 'name' => 'OB'],
     ['uId' => 3, 'name' => 'OC'],
     ['uId' => 2, 'name' => 'OC'],
     ['uId' => 11, 'name' => 'OC'],
   ]);
-  \M\Relation\Article::truncate();
-  \M\Relation\Article::creates([
+  \Model\Relation\Article::truncate();
+  \Model\Relation\Article::creates([
     ['aId' => 3, 'relationUserId' => 2, 'title' => 'T1'],
     ['aId' => 2, 'relationUserId' => 1, 'title' => 'T2'],
     ['aId' => 1, 'relationUserId' => 1, 'title' => 'T3'],

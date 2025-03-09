@@ -9,19 +9,56 @@ use \M\Core\Plugin\DateTime;
 
 
 final class Column {
+  public static function create(array $row): ?Column { // php8 -> return static
+    $row = array_change_key_case($row, CASE_LOWER);
 
-  private string $_type;
-  private string $_name;
-  private bool $_isNullable;
-  private bool $_isPrimary;
-  private bool $_isAutoIncrement;
-  private ?string $_defaultValue;
-  private ?bool $_isUnsigned;
-  private ?bool $_isZerofill;
-  private ?int $_length;
-  private ?array $_items;
-  private ?int $_precision;
-  private ?int $_scale;
+    $type = $row['type'] ?? null;
+    if (!(is_string($type) && $type !== '')) {
+      return null;
+    }
+    $type = self::_parseIntType($type);
+    if ($type === null) {
+      return null;
+    }
+
+    $name = $row['field'] ?? null;
+    if (!(is_string($name) && $name !== '')) {
+      return null;
+    }
+
+    $isNullable = $row['null'] ?? null;
+    $isNullable = is_string($isNullable) && strtolower($isNullable) === 'yes';
+
+    $isPrimary = $row['key'] ?? null;
+    $isPrimary = is_string($isPrimary) && strtolower($isPrimary) == 'pri';
+
+    $isAutoIncrement = $row['extra'] ?? null;
+    $isAutoIncrement = is_string($isAutoIncrement) && strtolower($isAutoIncrement) == 'auto_increment';
+
+    $defaultValue = $row['default'] ?? null;
+
+    $isUnsigned = $type['isUnsigned'];
+    $isZerofill = $type['isZerofill'];
+    $length = $type['length'];
+    $items = $type['items'];
+    $precision = $type['precision'];
+    $scale = $type['scale'];
+
+    $type = $type['type'];
+
+    if ($type == 'timestamp') {
+      $type = 'datetime';
+    }
+
+    if ($type == 'integer') {
+      $type = 'int';
+    }
+    if ($type == 'varchar' && $length === null) {
+      return null;
+    }
+
+    return new static($type, $name, $isNullable, $isPrimary, $isAutoIncrement, $defaultValue, $isUnsigned, $isZerofill, $length, $items, $precision, $scale);
+  }
 
   private static function _parseIntType(string $definition): ?array {
     $definition = preg_replace('/\s+/', ' ', trim($definition));
@@ -74,56 +111,19 @@ final class Column {
 
     return null;
   }
-  public static function create(array $row): ?Column { // php8 -> return static
-    $row = array_change_key_case($row, CASE_LOWER);
 
-    $type = $row['type'] ?? null;
-    if (!(is_string($type) && $type !== '')) {
-      return null;
-    }
-    $type = self::_parseIntType($type);
-    if ($type === null) {
-      return null;
-    }
-
-    $name = $row['field'] ?? null;
-    if (!(is_string($name) && $name !== '')) {
-      return null;
-    }
-
-    $isNullable = $row['null'] ?? null;
-    $isNullable = is_string($isNullable) && strtolower($isNullable) === 'yes';
-
-    $isPrimary = $row['key'] ?? null;
-    $isPrimary = is_string($isPrimary) && strtolower($isPrimary) == 'pri';
-
-    $isAutoIncrement = $row['extra'] ?? null;
-    $isAutoIncrement = is_string($isAutoIncrement) && strtolower($isAutoIncrement) == 'auto_increment';
-
-    $defaultValue = $row['default'] ?? null;
-
-    $isUnsigned = $type['isUnsigned'];
-    $isZerofill = $type['isZerofill'];
-    $length = $type['length'];
-    $items = $type['items'];
-    $precision = $type['precision'];
-    $scale = $type['scale'];
-
-    $type = $type['type'];
-
-    if ($type == 'timestamp') {
-      $type = 'datetime';
-    }
-
-    if ($type == 'integer') {
-      $type = 'int';
-    }
-    if ($type == 'varchar' && $length === null) {
-      return null;
-    }
-
-    return new static($type, $name, $isNullable, $isPrimary, $isAutoIncrement, $defaultValue, $isUnsigned, $isZerofill, $length, $items, $precision, $scale);
-  }
+  private string $_type;
+  private string $_name;
+  private bool $_isNullable;
+  private bool $_isPrimary;
+  private bool $_isAutoIncrement;
+  private ?string $_defaultValue;
+  private ?bool $_isUnsigned;
+  private ?bool $_isZerofill;
+  private ?int $_length;
+  private ?array $_items;
+  private ?int $_precision;
+  private ?int $_scale;
 
   private function __construct(string $type, string $name, bool $isNullable, bool $isPrimary, bool $isAutoIncrement, ?string $defaultValue, ?bool $isUnsigned, ?bool $isZerofill, ?int $length, ?array $items, ?int $precision, ?int $scale) {
     $this->_type = $type;

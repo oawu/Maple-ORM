@@ -12,9 +12,12 @@ final class Builder {
   private const _TYPE_UPDATE = "UPDATE";
   private const _TYPE_DELETE = "DELETE";
 
+  public static function create(?string $db, string $class, ?string $will = null): Builder { // php8 -> return static
+    return new static($db, $class, $will);
+  }
+
   private ?string $_type = null;
   private string $_class = '';
-
   private ?string $_will = null;
   private ?string $_order = null;
   private ?int $_limit = null;
@@ -28,12 +31,7 @@ final class Builder {
   private array $_attrs = [];
   private array $_relation = [];
   private array $_preBuilds = [];
-
   private ?string $_db = null;
-
-  public static function create(?string $db, string $class, ?string $will = null): Builder { // php8 -> return static
-    return new static($db, $class, $will);
-  }
 
   private function __construct(?string $db, string $class, ?string $will = null) {
     $this->_db = $db;
@@ -43,7 +41,6 @@ final class Builder {
   public function getDb(): ?string {
     return $this->_db;
   }
-
   public function getClass(): string {
     return $this->_class;
   }

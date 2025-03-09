@@ -6,16 +6,8 @@ use \M\Model;
 use \M\Helper;
 use \M\Core\Plugin\DateTime;
 
-
-
 final class Table {
   private static array $_instances = [];
-
-  private ?string $_db = null;
-  private string $_class = '';
-  private array $_columns = [];
-  private array $_primaries = [];
-  private ?array $_cacheName = null;
 
   public static function instance(?string $db, string $class): Table {
     $key = $db !== null ? ($db . '.' . $class) : $class;
@@ -28,6 +20,12 @@ final class Table {
     self::$_instances[$key] = $table;
     return $table;
   }
+
+  private ?string $_db = null;
+  private string $_class = '';
+  private array $_columns = [];
+  private array $_primaries = [];
+  private ?array $_cacheName = null;
 
   private function __construct(?string $db, string $class) {
     $this->_db = $db;

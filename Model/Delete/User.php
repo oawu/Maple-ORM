@@ -1,6 +1,6 @@
 <?php
 
-namespace M\Delete;
+namespace Model\Delete;
 
 use M\Model;
 

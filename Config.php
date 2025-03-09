@@ -18,7 +18,7 @@
   ->setPassword('1234')
   ->setDatabase('maple-orm-W'));
 
-\M\Model::setDir(PATH_MODEL);
+\M\Model::setDir('Model', PATH_MODEL);
 
 \M\Model::setCaseTable(\M\Model::CASE_CAMEL);
 \M\Model::setCaseColumn(\M\Model::CASE_CAMEL);

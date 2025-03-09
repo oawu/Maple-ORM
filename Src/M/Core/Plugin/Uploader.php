@@ -24,13 +24,6 @@ abstract class Uploader extends Plugin {
 
   private static $_func = null;
 
-  private string $_defaultUrl = '';
-  private string $_baseUrl = '';
-  private ?array $_driver = null;
-  private ?string $_tmpDir = null;
-  private array $_baseDirs   = [];
-  private array $_namingSorts = [];
-
   public static function func(callable $func): void {
     self::$_func = $func;
   }
@@ -40,6 +33,13 @@ abstract class Uploader extends Plugin {
   public static function allowTypes(): array {
     return ['varchar'];
   }
+
+  private string $_defaultUrl = '';
+  private string $_baseUrl = '';
+  private ?array $_driver = null;
+  private ?string $_tmpDir = null;
+  private array $_baseDirs   = [];
+  private array $_namingSorts = [];
 
   public function __construct(?Model $model, Column $column, ?string $value, ?callable $func = null, array $sorts = []) {
     parent::__construct($model, $column, $value);

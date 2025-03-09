@@ -1,6 +1,6 @@
 <?php
 
-namespace M\Transaction;
+namespace Model\Transaction;
 
 use M\Model;
 

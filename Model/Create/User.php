@@ -1,6 +1,6 @@
 <?php
 
-namespace M\Create;
+namespace Model\Create;
 
 use M\Model;
 

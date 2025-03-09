@@ -1,6 +1,6 @@
 <?php
 
-namespace M\File;
+namespace Model\File;
 
 use M\Model;
 
