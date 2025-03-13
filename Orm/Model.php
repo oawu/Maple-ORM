@@ -154,23 +154,12 @@ abstract class Model {
     Uploader::func($func);
   }
   public static function bindFile(string $column, ?callable $func = null): void {
-    // self::$_binds[] = [
-
     static::$_binds[$column] = [
       'class' => File::class,
       'func' => $func,
     ];
-    // static::getTable('')->setPlugins($column, [
-    //   'class' => File::class,
-    //   'func' => $func,
-    // ]);
   }
   public static function bindImage(string $column, ?callable $func = null): void {
-    // static::getTable('')->setPlugins($column, [
-    //   'class' => Image::class,
-    //   'func' => $func,
-    // ]);
-
     static::$_binds[$column] = [
       'class' => Image::class,
       'func' => $func,

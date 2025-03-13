@@ -2,8 +2,8 @@
 
 namespace Orm\Core\Plugin\Uploader\Driver;
 
-use \Orm\Core\Plugin\Uploader\Driver;
 use \Orm\Core\S3 as _S3;
+use \Orm\Core\Plugin\Uploader\Driver;
 
 final class S3 extends Driver {
   private _S3 $_s3;

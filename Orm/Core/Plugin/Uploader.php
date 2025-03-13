@@ -11,7 +11,6 @@ use \Orm\Core\Plugin\Uploader\Driver;
 use \Orm\Core\Plugin\Uploader\Driver\S3;
 use \Orm\Core\Plugin\Uploader\Driver\Local;
 
-
 abstract class Uploader extends Plugin {
   abstract protected function _clean(Driver $driver): ?string; // php8 -> return static
 

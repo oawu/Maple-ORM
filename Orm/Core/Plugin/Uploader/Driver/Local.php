@@ -2,15 +2,17 @@
 
 namespace Orm\Core\Plugin\Uploader\Driver;
 
-use \Orm\Core\Plugin\Uploader\Driver;
 use \Orm\Helper;
+use \Orm\Core\Plugin\Uploader\Driver;
 
 final class Local extends Driver {
   private $_storage = null;
 
   public function __construct(array $options = []) {
-    $storage = implode(DIRECTORY_SEPARATOR, Helper::explode($options['storage'] ?? '', '/', ['\\', '/']));
+    $storage = $options['storage'] ?? '';
+    $isRoot = $storage[0] === DIRECTORY_SEPARATOR;
 
+    $storage = ($isRoot ? DIRECTORY_SEPARATOR : '') . implode(DIRECTORY_SEPARATOR, Helper::explode($storage, '/', ['\\', '/']));
     if ($storage !== '') {
       $storage .= DIRECTORY_SEPARATOR;
     }

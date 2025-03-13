@@ -238,7 +238,6 @@ final class Column {
 
     return $value;
   }
-
   public function getType(): string {
     return $this->_type;
   }
