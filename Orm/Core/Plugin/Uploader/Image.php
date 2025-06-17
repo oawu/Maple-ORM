@@ -168,7 +168,14 @@ final class Image extends Uploader {
       throw new \Exception('搬移至暫存目錄時發生錯誤');
     }
 
-    $info = @exif_read_data($path);
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = finfo_file($finfo, $path);
+    finfo_close($finfo);
+    $info = [];
+    if ($mime === 'image/jpeg' || $mime === 'image/tiff') {
+      $info = exif_read_data($path);
+    }
+
     $orientation = $info['Orientation'] ?? 0;
     if ($orientation == 6) {
       $orientation = 90;
