@@ -6,6 +6,7 @@ use \Orm\Model;
 use \Orm\Helper;
 use \Orm\Core\Plugin;
 use \Orm\Core\Plugin\DateTime;
+use \Orm\Core\Plugin\Binary;
 
 final class Column {
   public static function create(array $row): ?Column { // php8 -> return static
@@ -191,6 +192,12 @@ final class Column {
     if (in_array($type, ['datetime', 'timestamp', 'date', 'time'])) {
       $plugin = [
         'class' => DateTime::class,
+        'func' => null,
+      ];
+    }
+    if (in_array($type, ['binary'])) {
+      $plugin = [
+        'class' => Binary::class,
         'func' => null,
       ];
     }

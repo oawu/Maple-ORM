@@ -210,18 +210,18 @@ abstract class Helper {
           'vals' => []
         ];
       }
+      if (is_string($val)) {
+        return [
+          'str' => $tableName . '.' . $key . ' = ?',
+          'vals' => [$val]
+        ];
+      }
       if (is_numeric($val)) {
         $val = 1 * $val;
 
         if (!is_int($val)) {
           return null;
         }
-        return [
-          'str' => $tableName . '.' . $key . ' = ?',
-          'vals' => [$val]
-        ];
-      }
-      if (is_string($val)) {
         return [
           'str' => $tableName . '.' . $key . ' = ?',
           'vals' => [$val]
@@ -254,17 +254,18 @@ abstract class Helper {
             continue;
           }
 
-          if (is_numeric($_val)) {
-            $_val = 1 * $_val;
-            if (!is_int($_val)) {
-              continue;
-            }
+
+          if (is_string($_val)) {
             $_strs[] = $tableName . '.' . $_key . ' = ?';
             $_vals[] = $_val;
             continue;
           }
 
-          if (is_string($_val)) {
+          if (is_numeric($_val)) {
+            $_val = 1 * $_val;
+            if (!is_int($_val)) {
+              continue;
+            }
             $_strs[] = $tableName . '.' . $_key . ' = ?';
             $_vals[] = $_val;
             continue;
@@ -309,6 +310,12 @@ abstract class Helper {
           'vals' => []
         ];
       }
+      if (is_string($val)) {
+        return [
+          'str' => $tableName . '.' . $key . ' = ?',
+          'vals' => [$val]
+        ];
+      }
       if (is_numeric($val)) {
         $val = 1 * $val;
 
@@ -320,12 +327,6 @@ abstract class Helper {
         } else {
           return null;
         }
-      }
-      if (is_string($val)) {
-        return [
-          'str' => $tableName . '.' . $key . ' = ?',
-          'vals' => [$val]
-        ];
       }
       if (is_array($val) && self::arrayIsList($val)) {
         $val = array_unique($val);
@@ -368,18 +369,18 @@ abstract class Helper {
           'vals' => []
         ];
     }
+    if (is_string($val)) {
+      return [
+        'str' => $tableName . '.' . $key . ' ' . $cmp . ' ?',
+        'vals' => [$val]
+      ];
+    }
     if (is_numeric($val)) {
       $val = 1 * $val;
 
       if (!is_int($val)) {
         return null;
       }
-      return [
-        'str' => $tableName . '.' . $key . ' ' . $cmp . ' ?',
-        'vals' => [$val]
-      ];
-    }
-    if (is_string($val)) {
       return [
         'str' => $tableName . '.' . $key . ' ' . $cmp . ' ?',
         'vals' => [$val]

@@ -29,6 +29,7 @@ final class Builder {
   private array $_attrs = [];
   private array $_relation = [];
   private array $_preBuilds = [];
+  private bool $_lockForUpdate = false;
   private ?string $_db = null;
 
   private function __construct(?string $db, string $class, ?string $will = null) {
@@ -92,6 +93,10 @@ final class Builder {
     }
 
     return ';';
+  }
+  public function lockForUpdate(): self {
+    $this->_lockForUpdate = true;
+    return $this;
   }
   public function select(string ...$_args): self {
     $args = [];
@@ -321,6 +326,7 @@ final class Builder {
     $having = $this->_getHaving();
     $order = $this->_getOrder();
     $limit = $this->_getLimit();
+    $lockForUpdate = $this->_getLockForUpdate();
     $offset = $this->_getOffset();
 
     if ($select !== null) {
@@ -357,6 +363,9 @@ final class Builder {
       } else {
         $strs[] = $limit;
       }
+    }
+    if ($lockForUpdate) {
+      $strs[] = 'FOR UPDATE';
     }
 
     return implode(' ', $strs) . ';';
@@ -472,7 +481,7 @@ final class Builder {
     foreach ($preBuilds as $relation) {
       $builders = array_filter(array_map(fn(Model $obj): ?Builder => method_exists($obj, $relation) ? $obj->$relation() : null, $objs), fn($obj) => $obj !== null);
 
-      $vals = array_filter(array_map(fn($builders) => $builders->_getRelation()['val'] ?? null, $builders), fn($obj) => $obj !== null);
+      $vals = array_values(array_filter(array_map(fn($builders) => $builders->_getRelation()['val'] ?? null, $builders), fn($obj) => $obj !== null));
 
       if (!$vals) {
         continue;
@@ -597,6 +606,9 @@ final class Builder {
   }
   private function _getOrder(): ?string {
     return $this->_order;
+  }
+  private function _getLockForUpdate(): bool {
+    return $this->_lockForUpdate;
   }
   private function _getLimit(): ?int {
     return $this->_limit;
