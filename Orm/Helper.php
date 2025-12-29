@@ -219,9 +219,9 @@ abstract class Helper {
       if (is_numeric($val)) {
         $val = 1 * $val;
 
-        if (!is_int($val)) {
-          return null;
-        }
+        // if (!is_int($val)) {
+        //   return null;
+        // }
         return [
           'str' => $tableName . '.' . $key . ' = ?',
           'vals' => [$val]
@@ -263,9 +263,6 @@ abstract class Helper {
 
           if (is_numeric($_val)) {
             $_val = 1 * $_val;
-            if (!is_int($_val)) {
-              continue;
-            }
             $_strs[] = $tableName . '.' . $_key . ' = ?';
             $_vals[] = $_val;
             continue;
@@ -319,18 +316,13 @@ abstract class Helper {
       if (is_numeric($val)) {
         $val = 1 * $val;
 
-        if (is_int($val)) {
-          return [
-            'str' => $tableName . '.' . $key . ' = ?',
-            'vals' => [$val]
-          ];
-        } else {
-          return null;
-        }
+        return [
+          'str' => $tableName . '.' . $key . ' = ?',
+          'vals' => [$val]
+        ];
       }
       if (is_array($val) && self::arrayIsList($val)) {
         $val = array_unique($val);
-        $key = self::quoteName($key);
 
         if (!$val) {
           return [
@@ -378,26 +370,21 @@ abstract class Helper {
     if (is_numeric($val)) {
       $val = 1 * $val;
 
-      if (!is_int($val)) {
-        return null;
-      }
       return [
         'str' => $tableName . '.' . $key . ' ' . $cmp . ' ?',
         'vals' => [$val]
       ];
     }
     if (is_array($val) && self::arrayIsList($val)) {
-      $val = array_unique($val);
 
       if ($cmp == 'BETWEEN') {
-        if (count($val) != 2) {
-          return null;
-        }
-        return [
+        return count($val) >= 2 ? [
           'str' => $tableName . '.' . $key . ' BETWEEN ? AND ?',
           'vals' => $val
-        ];
+        ] : null;
       }
+
+      $val = array_unique($val);
 
       if (in_array($cmp, ['!=', '!==', 'NOT IN'])) {
         if (!$val) {
