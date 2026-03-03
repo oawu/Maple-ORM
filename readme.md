@@ -1,10 +1,10 @@
 # Maple ORM
-歡迎來到 Model ORM Model
+歡迎來到 Maple ORM
 
 ## 說明
 * 這是 [Maple 9](https://github.com/oawu/Maple) 所採用的 ORM
 * 支援 PHP 7.4+
-* 支援 MySQL 5.7+
+* 支援 MySQL 5.5+
 * 支援 [駝峰命名法](https://en.wikipedia.org/wiki/Camel_case) 的資料庫
 * 支援 [蛇形命名法](https://en.wikipedia.org/wiki/Snake_case) 的資料庫
 * 支援欄位綁定 Uploader，分別有 Image、File 兩種 Uploader

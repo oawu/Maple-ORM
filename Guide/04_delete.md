@@ -1,83 +1,132 @@
-# delete
+# 刪除資料
 
-## 情境
-### 資料庫
-![](imgs/04-01.png)
+## 情境設定
 
-<!--
-#### 格式
-| 欄位 | 格式  |
-|---|---|
-| id | INT |
-| name | VARCHAR |
-| age | INT |
+以下範例使用 `User` Model，對應資料表：
 
-#### 資料
+| 欄位 | 型別 | 說明 |
+|------|------|------|
+| id | int | 主鍵，自動遞增 |
+| name | varchar(255) | 名稱 |
+| age | int | 年齡 |
+
+範例資料：
+
 | id | name | age |
-|---|---|---|
+|----|------|-----|
 | 1 | OA | 18 |
 | 2 | OB | 28 |
 | 3 | OC | 15 |
--->
-
-### Model
 
 ```php
-namespace App\Model;
+namespace Model;
 
 class User extends \Orm\Model {}
 ```
 
-## 單筆刪除
-Model 物件可使用 `delete` method 將該筆資訊從資料庫刪除，刪除成功則回傳 **true**，失敗則回傳 **false**。
+---
+
+## delete()
+
+刪除單筆資料。成功回傳 `$this`（Model 自身），失敗回傳 `null`。
 
 ```php
-$user = \App\Model\User::one(2);
-$result = $user->delete(); // $user->remove();
-
-echo $result ? '刪除成功' : '刪除失敗';
-
-$user = \App\Model\User::one(2); // 重新抓一次資料，應該會為 null
-echo $user ? '未刪除' : '已經成功刪除'; // 已經成功刪除
-```
-
-## 多筆刪除
-可採用 `deletes` 的方式來完成多筆刪除，成功即回傳 **筆數**，失敗則 **null**。
-
-```php
-// deleteAll 的方式
-$count = \App\Model\User::where('id', '>', 1)->deletes();
-echo $count ? '成功刪除' . $count . '筆資料' : '刪除失敗';
-
-$total = \App\Model\User::count(); // 取得所有數量
-echo $total; // 1
-```
-
-## 刪除之後
-此功能只給 **單筆刪除** 使用！
-
-如果每次刪除一筆 User 資料時，就要將其他資料也一並刪除，那就可以在 `afterDeletes` 內指定一個刪除完後需要做的 method，如果 `afterDeletes` 中若有一個回傳不是為 true，那此次刪除就會是失敗的，該 delete 即回傳 **false**。
-
-通常這類功能可以用在 **計數** 功能的欄位上。
-
-`afterDeletes` 不保證成功全跑完，失敗結束不影響新增。中間有一次斷掉後，後面的則不會做完。
-
-```php
-// 定義 Model
-class User extends Model {
-  static $afterDeletes = ['clean'];
-
-  public function clean() {
-    User::deleteAll();
-    return true;
-  }
-}
-
-// 新增一筆
-$user = \App\Model\User::one(2);
+$user = User::one(2);
 $result = $user->delete();
 
-if ($result) { // 刪除成功
-  echo \App\Model\User::count(); // 0
+if ($result) {
+  echo '刪除成功';
+  // $result === $user（同一物件）
+}
+
+// 確認已刪除
+$user = User::one(2);
+// $user === null
+```
+
+**方法簽名**：`delete(?int &$count = 0): ?self`
+
+### 取得影響筆數
+
+透過 by-reference 參數 `$count` 取得影響的列數：
+
+```php
+$user = User::one(1);
+
+$count = 0;
+$user->delete($count);
+echo $count; // 1
+```
+
+---
+
+## deletes()
+
+批次刪除多筆資料。成功回傳刪除筆數，失敗回傳 `null`。
+
+```php
+$count = User::where('id', '>', 1)->deletes();
+echo $count; // 2（OB、OC 被刪除）
+
+$total = User::count();
+echo $total; // 1（只剩 OA）
+```
+
+**方法簽名**：`static deletes(): ?int`
+
+`deletes()` 可搭配所有條件方法：
+
+```php
+$count = User::whereIn('id', [1, 3])->deletes();
+echo $count; // 2
+```
+
+---
+
+## truncate()
+
+清空整張資料表（`TRUNCATE TABLE`）。成功回傳 `true`，失敗回傳 `false`。
+
+```php
+$result = User::truncate();
+// SQL: TRUNCATE TABLE `User`
+```
+
+**方法簽名**：`static truncate(?string $db = null): bool`
+
+| 參數 | 說明 |
+|------|------|
+| `$db` | 指定資料庫 key（`null` 使用預設） |
+
+> `TRUNCATE` 會重設 AUTO_INCREMENT 計數器，與 `DELETE` 不同。
+
+---
+
+## afterDeletes
+
+Model 可定義 `$afterDeletes` 靜態屬性，在 `delete()` 成功後自動執行一系列方法。
+
+```php
+class User extends \Orm\Model {
+  static $afterDeletes = ['cleanProfile', 'cleanArticles'];
+
+  public function cleanProfile() {
+    return Profile::where('userId', $this->id)->deletes();
+  }
+
+  public function cleanArticles($prevResult) {
+    // $prevResult 是上一步 cleanProfile() 的回傳值
+    return Article::where('userId', $this->id)->deletes();
+  }
 }
 ```
+
+**執行規則**：
+
+- 按陣列順序依次執行
+- 每個方法接收**前一步的回傳值**作為參數（第一步無參數）
+- 任一步回傳 falsy 值會**中斷**後續步驟
+- **不影響已刪除的資料**：即使 callback 失敗，`delete()` 仍回傳成功
+- 失敗訊息會透過 Log Func 記錄
+
+> `afterDeletes` 僅適用於 `delete()`，不適用於 `deletes()`。

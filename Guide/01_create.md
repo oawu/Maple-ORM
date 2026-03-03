@@ -1,117 +1,151 @@
-# create
+# 新增資料
 
-## 情境
-### 資料庫
-![](imgs/01-01.png)
+## 情境設定
 
-<!--
-#### 格式
-| 欄位 | 格式  |
-|---|---|
-| id | INT |
-| name | VARCHAR |
-| age | INT |
+以下範例使用 `User` Model，對應資料表：
 
-#### 資料
-| id | name | age |
-|---|---|---|
--->
-
-### Model
+| 欄位 | 型別 | 說明 |
+|------|------|------|
+| id | int | 主鍵，自動遞增 |
+| name | varchar(255) | 名稱 |
+| age | int | 年齡 |
+| createAt | datetime | 建立時間（自動填入） |
+| updateAt | datetime | 更新時間（自動填入） |
 
 ```php
-namespace App\Model;
+namespace Model;
 
 class User extends \Orm\Model {}
 ```
 
-## 普通新增
+---
 
-新增成功則回傳該 **Model 物件**，失敗則回傳 **null**
+## create()
+
+新增單筆資料。成功回傳 Model 實例，失敗回傳 `null`。
 
 ```php
-$user = \App\Model\User::create([
+$user = User::create([
   'name' => 'OA',
-  'age' => 18,
+  'age'  => 18,
 ]);
 
 if ($user) {
-  echo $user->id; // 1
+  echo $user->id;   // 1（自動遞增）
   echo $user->name; // OA
-  echo $user->age; // 18
+  echo $user->age;  // 18
 } else {
-  var_dump($user); // null
+  // 新增失敗，$user 為 null
 }
 ```
 
-## 多筆新增
-全部皆新增成功則回傳 **數量**，只要有一筆失敗則回傳 **null**，下面例子雖然新增了兩筆資料，但其實只下了一次 Query
+**方法簽名**：`static create(array $attrs = [], array $allow = [], ?string $db = null): ?self`
+
+| 參數 | 說明 |
+|------|------|
+| `$attrs` | 欄位與值的關聯式陣列 |
+| `$allow` | 白名單陣列，限制只能寫入哪些欄位（空陣列 = 不限制） |
+| `$db` | 指定資料庫 key（`null` 使用預設） |
+
+### allow 白名單
+
+當資料來源不確定（如外部 API 回傳）時，用 `$allow` 過濾安全欄位：
 
 ```php
-$datas = [];
-array_push($datas, [
-  'name' => 'OA'
-  'age' => 18,
-]);
-array_push($datas, [
-  'name' => 'OB'
-  'age' => 28,
-]);
+$data = ['name' => 'OA', 'age' => 18, 'role' => 'admin'];
 
-$count = \App\Model\User::creates($datas);
-echo $count === 3 ? '成功新增' . $count . '筆資料' : '新增失敗';
+// 只允許寫入 name 和 age，role 會被忽略
+$user = User::create($data, ['name', 'age']);
 ```
 
-如果資料太多，想要分批新增，可以在**第二參數**決定多少筆數為一批，下列範例是以每 10筆為一批去執行，以下面例子共有 26 筆資料，若採用 10筆分批，則會 **下 3 次 Query**
-成功即回傳 **筆數**，失敗則 **null**。
+自己組裝的資料（key 確定）不需要 allow。
+
+### 自動填入時間
+
+`createAt` 和 `updateAt` 欄位會自動填入當前時間，不需要手動設定。
+
+### 指定資料庫
 
 ```php
-$datas = [
-  ['name' => 'OA', 'age' => 18],
-  ['name' => 'OB', 'age' => 28],
-  // ... N 筆資料
-  ['name' => 'OY', 'age' => 31],
-  ['name' => 'OZ', 'age' => 26],
+// 寫入 'W' 資料庫
+$user = User::create(['name' => 'OA'], [], 'W');
+```
+
+---
+
+## creates()
+
+批次新增多筆資料。成功回傳新增筆數，失敗回傳 `null`。
+
+```php
+$count = User::creates([
+  ['name' => 'A', 'age' => 10],
+  ['name' => 'B', 'age' => 20],
+]);
+
+// $count === 2（新增 2 筆）
+```
+
+**方法簽名**：`static creates(array $rows = [], int $limit = 50, ?string $db = null): ?int`
+
+| 參數 | 說明 |
+|------|------|
+| `$rows` | 二維陣列，每個元素為一筆資料 |
+| `$limit` | 每批次最多幾筆（預設 50），超過會自動分批 INSERT |
+| `$db` | 指定資料庫 key |
+
+### 分批新增
+
+當資料量大時，會自動分批執行 INSERT：
+
+```php
+$rows = [
+  ['name' => 'A', 'age' => 10],
+  ['name' => 'B', 'age' => 20],
+  // ... 共 26 筆
+  ['name' => 'Y', 'age' => 31],
+  ['name' => 'Z', 'age' => 26],
 ];
 
-$count = \App\Model\User::creates($datas, 10);
-echo $count !== null ? '成功新增' . $count . '筆資料' : '新增失敗';
+// 每 10 筆一批，26 筆會分 3 次 INSERT
+$count = User::creates($rows, 10);
+// $count === 26（成功）或 null（失敗）
 ```
 
-第三個參數則為選擇哪一個 DB，預設為 Config 設定中的第一個 DB，若要指定其他 DB，則可以帶入 DB 名稱。
+### 指定資料庫
 
 ```php
-$count = \App\Model\User::creates($datas, 10, 'db2');
+$count = User::creates($rows, 50, 'W');
 ```
 
-## 新增之後
-此功能只給 **普通新增** 使用！
+---
 
-如果每次新增一筆 User 資料時，都需要在 name 欄位加入 `'Suffix_'` 字串，那就可以在 `afterCreates` 內指定一個新增完後需要做的 method，如果 `afterCreates` 中若有一個回傳不是為 true，那此次新增就會是失敗的，該 create 即回傳 **false**。
+## afterCreates
 
-通常這類功能可以用在 **計數** 功能的欄位上。
-
-`afterCreates` 不保證成功全跑完，失敗結束不影響新增。中間有一次斷掉後，後面的則不會做完。
+Model 可定義 `$afterCreates` 靜態屬性，在 `create()` 成功後自動執行一系列方法。
 
 ```php
-// 定義 Model
-class User extends Model {
-  static $afterCreates = ['addSuffix'];
+class User extends \Orm\Model {
+  static $afterCreates = ['initProfile', 'sendWelcome'];
 
-  public function addSuffix() {
-    $this->name = 'Suffix_';
-    $this->save();
+  public function initProfile() {
+    return Profile::create(['userId' => $this->id]);
+  }
+
+  public function sendWelcome($profile) {
+    // $profile 是上一步 initProfile() 的回傳值
+    // 寄送歡迎信...
     return true;
   }
 }
-
-// 新增一筆
-$user = \App\Model\User::create([
-  'name' => 'OA',
-  'age' => 18
-]);
-
-if ($user) { // 新增成功
-	echo $user->name; // Suffix_OA
-}
 ```
+
+**執行規則**：
+
+- 按陣列順序依次執行
+- 每個方法接收**前一步的回傳值**作為參數（第一步無參數）
+- 任一步回傳 falsy 值會**中斷**後續步驟
+- **不影響已新增的資料**：即使 callback 失敗，`create()` 仍回傳成功建立的 Model 實例
+- 失敗訊息會透過 Log Func 記錄
+
+> `afterCreates` 僅適用於 `create()`，不適用於 `creates()`。

@@ -1,194 +1,295 @@
-# 設定
+# 初始設定
 
-引用此 ORM 須先做的基礎設定，可參考 `Config.php` 內的寫法，以下為設定項目：
+引用此 ORM 須先做基礎設定，可參考專案根目錄的 `Config.php` 範例。
 
-* 必須設定
-  * 資料庫連線方式，可設定多組
-  * 指定 Model 放置的目錄
+---
 
-* 非必須
-  * 專案 Model 的命名規則
-  * 指定 error func 函式
-  * 指定 query log 函式
-  * 指定 model log 函式
-  * 指定 cacheFunc 函式
-  * 施加鹽巴
-  * 指定縮圖方式
-  * 設定所有上傳器預設值
+## 資料庫連線
 
-## 資料庫連線方式
-目前支援跨資料庫功能，其設定方式如下，依序填入其值即可：
+支援多組資料庫連線（讀寫分離），以字串 key 區分。空字串 `''` 為預設資料庫：
 
 ```php
-\Orm\Model::setConfig('', \Orm\Core\Config::create()
+use \Orm\Core\Config;
+
+// 預設資料庫
+\Orm\Model::setConfig('', Config::create()
   ->setHostname('127.0.0.1')
   ->setUsername('root')
   ->setPassword('password')
-  ->setDatabase('database'));
+  ->setDatabase('my_db'));
+
+// 第二組資料庫（例如唯讀）
+\Orm\Model::setConfig('R', Config::create()
+  ->setHostname('127.0.0.1')
+  ->setUsername('root')
+  ->setPassword('password')
+  ->setDatabase('my_db_read'));
 ```
 
-## 指定 Model 需要去除的 namespace
-應用的 Model 有可能會有多餘的 namespace，可以透過此設定來去除。
+`Config` 可用方法：
+
+| 方法 | 預設值 | 說明 |
+|------|--------|------|
+| `setHostname(string)` | `''` | 主機位址 |
+| `setUsername(string)` | `''` | 使用者名稱 |
+| `setPassword(string)` | `''` | 密碼 |
+| `setDatabase(string)` | `''` | 資料庫名稱 |
+| `setEncoding(string)` | `'utf8mb4'` | 字元編碼 |
+
+---
+
+## 指定 Model Namespace
+
+ORM 會根據 Model class 的名稱自動推導資料表名稱。若 Model 有多餘的 namespace 前綴，可設定要去除的部分：
 
 ```php
-\Orm\Model::setNamespace('App\Model\...');
+// Model 完整名稱為 Model\User，去除 'Model' 後得到 'User' → 對應資料表 User
+\Orm\Model::setNamespace('Model');
+
+// 也可一次設定多個
+\Orm\Model::setNamespace('App', 'Model');
 ```
 
-## 專案 Model 的命名規則
-針對此專案的資料庫命名規則做設定，預設是 **駝峰命名** 方式，但亦可選擇 **蛇形命名** 模式。
-欄位亦可設定選擇哪種方式。
+**方法簽名**：`setNamespace(string ...$names): void`
 
-* 駝峰命名 - Table 名稱為**單數大駝峰**，欄位名稱為**單數小駝峰**
-* 蛇形命名 - Table 名稱為**複數蛇行命名**，欄位名稱為**單數蛇行命名**
+---
+
+## 命名規則（Table / Column）
+
+設定資料庫的命名風格，預設為**駝峰命名**。
 
 ```php
-// 駝峰命名
-
-// 資料庫格式
-// User       Article
-// ---------  ---------
-// id         id
-// name       userId
-// createAt   title
-//            createAt
+// 駝峰命名（預設）
 \Orm\Model::setCaseTable(\Orm\Model::CASE_CAMEL);
 \Orm\Model::setCaseColumn(\Orm\Model::CASE_CAMEL);
 
 // 蛇形命名
-
-// 資料庫格式
-// users       articles
-// ---------   ---------
-// id          id
-// name        user_id
-// created_at  title
-//             created_at
 \Orm\Model::setCaseTable(\Orm\Model::CASE_SNAKE);
 \Orm\Model::setCaseColumn(\Orm\Model::CASE_SNAKE);
 ```
 
-## 指定 Error Func 函式
-發生**不可允許**的錯誤時，紀錄其原因，例如尚未設定連線方式時的錯誤原因。參數為字串。
+兩種命名的資料庫對照：
+
+| 項目 | 駝峰（Camel） | 蛇形（Snake） |
+|------|---------------|---------------|
+| Table | `User`（單數大駝峰） | `users`（複數蛇形） |
+| Column | `userId`（小駝峰） | `user_id`（蛇形） |
+| createAt | `createAt` | `created_at` |
+| updateAt | `updateAt` | `updated_at` |
+
+---
+
+## Error Func
+
+設定**嚴重錯誤**的處理函式，例如未設定連線方式、欄位不可為 null 等。
 
 ```php
-\Orm\Model::setErrorFunc(static function(...$args) {
-  // ...
-  // var_dump($args);
-  // exit();
+\Orm\Model::setErrorFunc(static function (...$args) {
+  var_dump($args);
+  exit();
 });
 ```
 
-## 指定 Query Log 函式
-紀錄程式執行過程中對資料庫所下的 SQL Query，參數分別：
+**方法簽名**：`setErrorFunc(?callable $func = null): void`
 
-1. 哪一個資料庫
-2. SQL 字串
-3. 帶入參數
-4. 結果
-5. 耗時，單位為 1/1000 秒
+---
+
+## Query Log Func
+
+紀錄程式執行過程中所有的 SQL Query。
 
 ```php
-\Orm\Model::setQueryLogFunc(static function(string $db, string $sql, array $vals, string $status, float $during) {
+\Orm\Model::setQueryLogFunc(static function (string $db, string $sql, array $vals, bool $status, float $during) {
+  // $db     — 資料庫 key（'' 為預設）
+  // $sql    — SQL 字串
+  // $vals   — 綁定參數
+  // $status — 執行結果（true 成功 / false 失敗）
+  // $during — 耗時（秒，浮點數）
 });
 ```
 
-若要取得上次的 Log，可以使用 `\Orm\Model::getLastQueryLog()` 方法。
+**方法簽名**：`setQueryLogFunc(?callable $func = null): void`
 
-## 指定 Log 函式
-發生**可允許**的錯誤時，紀錄其原因，例如新增失敗時的原因。參數為字串。
+取得最後一筆 Query Log：
 
 ```php
-\Orm\Model::setLogFunc(static function(string $message) {
+$log = \Orm\Model::getLastQueryLog();
+// 回傳 array: ['db', 'sql', 'vals', 'status', 'during', 'log']
+// 或 null（尚無紀錄時）
+```
+
+---
+
+## Log Func
+
+紀錄**可預期的錯誤**，例如新增 / 更新 / 刪除失敗時的原因。
+
+```php
+\Orm\Model::setLogFunc(static function (string $message) {
+  // $message — 錯誤訊息
 });
 ```
 
-若要取得上次的 Log，可以使用 `\Orm\Model::getLastLog()` 方法。
+**方法簽名**：`setLogFunc(?callable $func = null): void`
 
-
-## 指定 Cache Func 函式
-針對 ORM 特定功能做 Cache，目前主要是針對 `MetaData` 可做 Cache 功能。
-
-如下範例，因為功能需求在首次撈取資料表時，都會下 meta 語法以取得所有表格欄位資訊，可以針對此功能做 cache 已減少對資料庫的 query 次數。
+取得最後一筆 Log：
 
 ```php
-\Orm\Model::setCacheFunc('MetaData', fn (string $key, callable $closure) {
+$message = \Orm\Model::getLastLog();
+// 回傳 string 或 null
+```
+
+---
+
+## Cache Func
+
+針對特定功能啟用快取。目前支援 `MetaData`（資料表欄位結構），ORM 首次查詢資料表時會執行 `SHOW COLUMNS` 取得欄位資訊，透過 cache 可減少重複查詢。
+
+```php
+\Orm\Model::setCacheFunc('MetaData', static function (string $key, callable $closure) {
+  // 自行實作快取邏輯，例如 Redis、File cache 等
+  // $key     — 快取鍵值
+  // $closure — 原始取得資料的 closure，呼叫 $closure() 取得結果
   return $closure();
 });
 ```
 
-## 施加鹽巴
-上傳器網址路徑的加密關鍵字串，若沒設定的話，則用 id 流水號為主。
+**方法簽名**：`setCacheFunc(string $type, callable $func): void`
+
+---
+
+## Hashids
+
+設定 Uploader 儲存路徑的 Hashids 加密。若未設定，路徑以 id 流水號為主。
 
 ```php
-\Orm\Model::setHashids(8, 'key', 'abcdefghijklmnopqrstuvwxyz1234567890');
+\Orm\Model::setHashids(8, 'my-salt', 'abcdefghijklmnopqrstuvwxyz1234567890');
 ```
 
-## 指定縮圖方式
-搭配其他縮圖工具的功能，主要是提供給 Image Uploader 使用。
+**方法簽名**：`setHashids(int $minLength = 0, string $salt = '', ?string $alphabet = null): void`
+
+| 參數 | 說明 |
+|------|------|
+| `$minLength` | 最小長度 |
+| `$salt` | 加密鹽值 |
+| `$alphabet` | 自訂字母表，`null` 使用預設 |
+
+---
+
+## 縮圖方式
+
+指定 Image Uploader 使用的縮圖工具。目前內建 `Gd` 和 `Imagick`：
 
 ```php
+// 使用 GD
+\Orm\Model::setImageThumbnail(fn ($file) => \Orm\Core\Thumbnail\Gd::create($file));
+
+// 使用 Imagick
 \Orm\Model::setImageThumbnail(fn ($file) => \Orm\Core\Thumbnail\Imagick::create($file));
 ```
 
-## 設定所有上傳器預設值
-設定所有上傳器預設值，上傳器被初始化時，同時會呼叫此 function，故可以預先設定。
+**方法簽名**：`setImageThumbnail(callable $func): void`
+
+---
+
+## Uploader 預設值
+
+設定所有 Uploader（File / Image）的共用預設值。每個 Uploader 被初始化時，都會呼叫此 callback：
 
 ```php
-\Orm\Model::setUploader(static function(M\Core\Plugin\Uploader $uploader): void {
+\Orm\Model::setUploader(static function (\Orm\Core\Plugin\Uploader $uploader): void {
+  // ===== 儲存驅動 =====
+
+  // Local 驅動
+  $uploader->setDriver('Local', ['storage' => '/path/to/storage/']);
+
+  // S3 驅動
+  // $uploader->setDriver('S3', [
+  //   'bucket' => '',       // 儲存空間名稱（必填）
+  //   'access' => '',       // 存取金鑰（必填）
+  //   'secret' => '',       // 密鑰（必填）
+  //   'region' => 'ap-northeast-1',  // 區域
+  //   'acl'    => 'public-read',     // 權限：private / public-read / public-read-write / authenticated-read
+  //   'ttl'    => 0,                 // Cache 秒數
+  //   'isUseSSL' => false,           // 是否使用 SSL
+  // ]);
+
+  // ===== 命名規則 =====
+  // 依優先順序決定檔名：origin（原始檔名）、md5（內容雜湊）、random（隨機）
+  $uploader->setNamingSort('origin', 'md5', 'random');
+
+  // ===== 目錄與網址 =====
+  $uploader->setTmpDir('/path/to/tmp/');            // 暫存目錄
+  $uploader->setBaseDir('Storage');                  // 儲存基礎目錄
+  $uploader->setBaseUrl('http://example.com/');      // 基礎網址
+  $uploader->setDefaultUrl('http://example.com/404.png');  // 預設網址（無檔案時）
+
+  // ===== Image 專用：縮圖版本 =====
+  if ($uploader instanceof \Orm\Core\Plugin\Uploader\Image) {
+    $uploader->addVersion('w100')->setMethod('resize')->setArgs(100, 100, 'width');
+  }
 });
 ```
 
-設定上傳器採用哪些的 Driver，目前支援 `S3` 與 `Local` 兩種上傳方式。
+**方法簽名**：`setUploader(callable $func): void`
 
-採用 Local 方式的上傳器，需設定參數 `dir`，指定儲存的目錄路徑。
+---
 
-```php
-$uploader->setDriver('Local', ['storage' => '/path/.../']);
-```
-
-採用 S3 方式的上傳器，帶入參數必需要有 **bucket**、**access**、**secret**，非必需有 **acl**、**ttl**、**isUseSSL**、**isVerifyPeer** 可以設定。
-
-* bucket - 儲存空間名稱
-* access - 存取金鑰
-* secret - 密鑰
-* region - 區域
-* acl - 權限，共有 `private`、`public-read`、`public-read-write`、`authenticated-read` 四種權限設定，預設為 `public-read`
-* ttl - cache 時間，以秒為單位，預設為 0，不做 cache
-* isUseSSL - 是否採用 SSL 方式，預設為 false
+## 完整設定範例
 
 ```php
-$uploader->setDriver('S3', [
-  'bucket' => '',
-  'access' => '',
-  'secret' => '',
-  'region' => 'ap-northeast-1',
-  'acl' => 'private',
-  'ttl' => 0,
-  'isUseSSL' => false,
-]);
-```
+<?php
 
-其他設定如下。
+use \Orm\Core\Config;
 
-```php
-// 指定命名規則
-$uploader->setNamingSort('origin', 'md5', 'random');
+// 資料庫連線
+\Orm\Model::setConfig('', Config::create()
+  ->setHostname('db-mysql')
+  ->setUsername('root')
+  ->setPassword('1234')
+  ->setDatabase('orm'));
 
-// 指定系統暫存目錄當暫存目錄
-$uploader->setTmpDir(sys_get_temp_dir() . DIRECTORY_SEPARATOR);
+// Model namespace
+\Orm\Model::setNamespace('Model');
 
-// 儲存的基礎名稱
-$uploader->setBaseDir('dir1', 'dir2');
+// 命名規則
+\Orm\Model::setCaseTable(\Orm\Model::CASE_CAMEL);
+\Orm\Model::setCaseColumn(\Orm\Model::CASE_CAMEL);
 
-// 基礎網址
-$uploader->setBaseUrl('http://demo.ioa.tw/');
+// 錯誤處理
+\Orm\Model::setErrorFunc(static function (...$args) {
+  var_dump($args);
+  exit();
+});
 
-// 預設的網址
-$uploader->setDefaultUrl('http://demo.ioa.tw/404.png');
-```
+// Query Log
+\Orm\Model::setQueryLogFunc(static function (string $db, string $sql, array $vals, bool $status, float $during) {
+});
 
-可針對 Image Uploader 設定統一的縮圖版本：
+// Log
+\Orm\Model::setLogFunc(static function (string $message) {
+});
 
-```php
-$uploader->addVersion('w100')->setMethod('resize')->setArgs(100, 100, 'width');
+// Cache
+\Orm\Model::setCacheFunc('MetaData', fn (string $key, callable $closure) => $closure());
+
+// Hashids
+\Orm\Model::setHashids(8, 'key', 'abcdefghijklmnopqrstuvwxyz1234567890');
+
+// 縮圖
+\Orm\Model::setImageThumbnail(fn ($file) => \Orm\Core\Thumbnail\Gd::create($file));
+
+// Uploader
+\Orm\Model::setUploader(static function (\Orm\Core\Plugin\Uploader $uploader): void {
+  $uploader->setDriver('Local', ['storage' => PATH]);
+  $uploader->setNamingSort('origin', 'md5', 'random');
+  $uploader->setTmpDir(PATH_TMP);
+  $uploader->setBaseDir('Storage');
+  $uploader->setBaseUrl(BASE_URL);
+  $uploader->setDefaultUrl(BASE_URL . '404.png');
+
+  if ($uploader instanceof \Orm\Core\Plugin\Uploader\Image) {
+    $uploader->addVersion('w100')->setMethod('resize')->setArgs(100, 100, 'width');
+  }
+});
 ```
