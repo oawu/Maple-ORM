@@ -46,6 +46,8 @@ if ($error = Connection::instance('W')->runQuery($sql)) {
 }
 
 
+title('User 延遲載入');
+
 $userRs = User::db('R')->where([1, 3])->all();
 $userWs = User::db('W')->where([1, 2])->all();
 
@@ -73,9 +75,10 @@ foreach ($userWs as $user) {
     $ids[] = $book->title;
   }
 }
-if (md5(json_encode($ids)) != '20edceb41915aac7d1416ed8238b3f8d') {
-  throw new Exception();
-}
+check(md5(json_encode($ids)) == '20edceb41915aac7d1416ed8238b3f8d');
+
+
+title('User Eager Loading');
 
 $userRs = User::db('R')->relation('book1', 'book1s')->where([1, 3])->all();
 $userWs = User::db('W')->relation('book1', 'book1s')->where([1, 2])->all();
@@ -104,9 +107,10 @@ foreach ($userWs as $user) {
     $ids[] = $book->title;
   }
 }
-if (md5(json_encode($ids)) != '20edceb41915aac7d1416ed8238b3f8d') {
-  throw new Exception();
-}
+check(md5(json_encode($ids)) == '20edceb41915aac7d1416ed8238b3f8d');
+
+
+title('User 自訂鍵');
 
 $userRs = User::db('R')->where([1, 3])->all();
 $userWs = User::db('W')->where([1, 2])->all();
@@ -134,9 +138,10 @@ foreach ($userWs as $user) {
     $ids[] = $book->title;
   }
 }
-if (md5(json_encode($ids)) != 'ecb60dc4be806b474d455b695561a485') {
-  throw new Exception();
-}
+check(md5(json_encode($ids)) == 'ecb60dc4be806b474d455b695561a485');
+
+
+title('User 自訂鍵 Eager Loading');
 
 $userRs = User::db('R')->relation('book2', 'book2s')->where([1, 3])->all();
 $userWs = User::db('W')->relation('book2', 'book2s')->where([1, 2])->all();
@@ -164,12 +169,12 @@ foreach ($userWs as $user) {
     $ids[] = $book->title;
   }
 }
-if (md5(json_encode($ids)) != 'ecb60dc4be806b474d455b695561a485') {
-  throw new Exception();
-}
+check(md5(json_encode($ids)) == 'ecb60dc4be806b474d455b695561a485');
 
 
 // ====================================================================
+
+title('Book 延遲載入');
 
 $bookRs = Book::db('R')->where([1, 3])->all();
 $bookWs = Book::db('W')->where([1, 2])->all();
@@ -198,10 +203,10 @@ foreach ($bookWs as $book) {
     $ids[] = $user->name;
   }
 }
+check(md5(json_encode($ids)) == 'bbc1c23a0c6fb47cc2387d24af750e0e');
 
-if (md5(json_encode($ids)) != 'bbc1c23a0c6fb47cc2387d24af750e0e') {
-  throw new Exception();
-}
+
+title('Book Eager Loading');
 
 $bookRs = Book::db('R')->relation('user1', 'user1s')->where([1, 3])->all();
 $bookWs = Book::db('W')->relation('user1', 'user1s')->where([1, 2])->all();
@@ -230,10 +235,10 @@ foreach ($bookWs as $book) {
     $ids[] = $user->name;
   }
 }
+check(md5(json_encode($ids)) == 'bbc1c23a0c6fb47cc2387d24af750e0e');
 
-if (md5(json_encode($ids)) != 'bbc1c23a0c6fb47cc2387d24af750e0e') {
-  throw new Exception();
-}
+
+title('Book 自訂鍵');
 
 $bookRs = Book::db('R')->where([1, 3])->all();
 $bookWs = Book::db('W')->where([1, 2])->all();
@@ -262,10 +267,10 @@ foreach ($bookWs as $book) {
     $ids[] = $user->name;
   }
 }
+check(md5(json_encode($ids)) == '013cf2d078db4330eba81e5a4f0b4ff1');
 
-if (md5(json_encode($ids)) != '013cf2d078db4330eba81e5a4f0b4ff1') {
-  throw new Exception();
-}
+
+title('Book 自訂鍵 Eager Loading');
 
 $bookRs = Book::db('R')->relation('user2', 'user2s')->where([1, 3])->all();
 $bookWs = Book::db('W')->relation('user2', 'user2s')->where([1, 2])->all();
@@ -294,7 +299,4 @@ foreach ($bookWs as $book) {
     $ids[] = $user->name;
   }
 }
-
-if (md5(json_encode($ids)) != '013cf2d078db4330eba81e5a4f0b4ff1') {
-  throw new Exception();
-}
+check(md5(json_encode($ids)) == '013cf2d078db4330eba81e5a4f0b4ff1');

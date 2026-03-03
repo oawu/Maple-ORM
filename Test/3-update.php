@@ -33,147 +33,106 @@ if ($error = Connection::instance()->runQuery($sql)) {
   ['name' => 'OC', 'bio' => 'Hi!', 'sex' => 'boy', 'birthday' => '2000-03-29', 'height' => '155.1', 'weight' => '47.1', 'info' => 'null'],
 ]);
 
-if (\Model\Update\User::one(1)->birthday->getValue() != '1989-07-21') {
-  throw new Exception();
-}
-if (\Model\Update\User::one(2)->birthday->getValue() != '1989-03-19') {
-  throw new Exception();
-}
-if (\Model\Update\User::one(3)->birthday->getValue() != '2000-03-29') {
-  throw new Exception();
-}
+// === updates() 批次更新 ===
+title('updates() 批次更新');
 
-if (\Model\Update\User::updates(['birthday' => '1900-01-01']) != 3) {
-  throw new Exception();
-}
+check(\Model\Update\User::one(1)->birthday->getValue() == '1989-07-21');
+check(\Model\Update\User::one(2)->birthday->getValue() == '1989-03-19');
+check(\Model\Update\User::one(3)->birthday->getValue() == '2000-03-29');
+
+check(\Model\Update\User::updates(['birthday' => '1900-01-01']) == 3);
 
 $u1 = \Model\Update\User::one(1);
 $u2 = \Model\Update\User::one(2);
 $u3 = \Model\Update\User::one(3);
 
-if ($u1->birthday->getValue() != '1900-01-01') {
-  throw new Exception();
-}
-if ($u2->birthday->getValue() != '1900-01-01') {
-  throw new Exception();
-}
-if ($u3->birthday->getValue() != '1900-01-01') {
-  throw new Exception();
-}
+check($u1->birthday->getValue() == '1900-01-01');
+check($u2->birthday->getValue() == '1900-01-01');
+check($u3->birthday->getValue() == '1900-01-01');
+
+// === save() 單筆更新 ===
+title('save() 單筆更新');
 
 $u1->birthday = '1989-07-21';
 $u2->birthday = '1989-03-19';
 $u3->birthday = '2000-03-29';
 
-if (!($u1->save() && $u2->save() && $u3->save())) {
-  throw new Exception();
-}
+check($u1->save() !== null);
+check($u2->save() !== null);
+check($u3->save() !== null);
 
-if (\Model\Update\User::where('id', '!=', 1)->update(['birthday' => '1900-01-01']) != 2) {
-  throw new Exception();
-}
+// === update() 條件更新 ===
+title('update() 條件更新');
 
-if (\Model\Update\User::one(1)->birthday->getValue() != '1989-07-21') {
-  throw new Exception();
-}
-if (\Model\Update\User::one(2)->birthday->getValue() != '1900-01-01') {
-  throw new Exception();
-}
-if (\Model\Update\User::one(3)->birthday->getValue() != '1900-01-01') {
-  throw new Exception();
-}
+check(\Model\Update\User::where('id', '!=', 1)->update(['birthday' => '1900-01-01']) == 2);
+
+check(\Model\Update\User::one(1)->birthday->getValue() == '1989-07-21');
+check(\Model\Update\User::one(2)->birthday->getValue() == '1900-01-01');
+check(\Model\Update\User::one(3)->birthday->getValue() == '1900-01-01');
+
+// === JSON 欄位更新 ===
+title('JSON 欄位更新');
 
 $u1 = \Model\Update\User::one(1);
-if ($u1->info !== ['a' => 'a1', 'b' => [1, 2, 3]]) {
-  throw new Exception();
-}
+check($u1->info === ['a' => 'a1', 'b' => [1, 2, 3]]);
 $u1->info = null;
 $u1->save();
 
 $u1 = \Model\Update\User::one(1);
-if ($u1->info !== null) {
-  throw new Exception();
-}
+check($u1->info === null);
 $u1->info = 'null';
 $u1->save();
 
 $u1 = \Model\Update\User::one(1);
-if ($u1->info !== 'null') {
-  throw new Exception();
-}
+check($u1->info === 'null');
 $u1->info = 0;
 $u1->save();
 
 $u1 = \Model\Update\User::one(1);
-if ($u1->info !== 0) {
-  throw new Exception();
-}
+check($u1->info === 0);
 
 $u2 = \Model\Update\User::one(2);
 $u2->info = ['a' => 'a1', 'b' => [1, 2, 3]];
 $u2->save();
 $u2 = \Model\Update\User::one(2);
-if ($u2->info !== ['a' => 'a1', 'b' => [1, 2, 3]]) {
-  throw new Exception();
-}
+check($u2->info === ['a' => 'a1', 'b' => [1, 2, 3]]);
 \Model\Update\User::where(2)->update(['info' => null]);
 
 $u2 = \Model\Update\User::one(2);
-if ($u2->info !== null) {
-  throw new Exception();
-}
+check($u2->info === null);
 \Model\Update\User::where(2)->update(['info' => 'null']);
 $u2 = \Model\Update\User::one(2);
-if ($u2->info !== 'null') {
-  throw new Exception();
-}
+check($u2->info === 'null');
 
 \Model\Update\User::where(2)->update(['info' => 0]);
 $u2 = \Model\Update\User::one(2);
-if ($u2->info !== 0) {
-  throw new Exception();
-}
+check($u2->info === 0);
+
+// === DateTime 欄位更新 ===
+title('DateTime 欄位更新');
 
 $u = \Model\Update\User::one(1);
-if ($u->birthday->getValue() != '1989-07-21') {
-  throw new Exception();
-}
+check($u->birthday->getValue() == '1989-07-21');
 $u->birthday = $date = date('Y-m-d');
-if (!$u->save()) {
-  throw new Exception();
-}
+check($u->save() !== null);
 
 $u = \Model\Update\User::one(1);
-if ($u->birthday->getValue() != $date) {
-  throw new Exception();
-}
+check($u->birthday->getValue() == $date);
 
 $u->birthday = \DateTime::createFromFormat('Y-m-d', $date);
-if (!$u->save()) {
-  throw new Exception(\Orm\Model::getLastLog());
-}
+check($u->save() !== null);
 
 $u = \Model\Update\User::one(1);
-if ($u->birthday->getValue() != $date) {
-  throw new Exception();
-}
+check($u->birthday->getValue() == $date);
 
 $u->birthday = '1989-07-21';
-if (!$u->save()) {
-  throw new Exception(\Orm\Model::getLastLog());
-}
+check($u->save() !== null);
 
 $u = \Model\Update\User::one(1);
-if ($u->birthday->getValue() != '1989-07-21') {
-  throw new Exception();
-}
+check($u->birthday->getValue() == '1989-07-21');
 
 $u->birthday = null;
-if (!$u->save()) {
-  throw new Exception(\Orm\Model::getLastLog());
-}
+check($u->save() !== null);
 
 $u = \Model\Update\User::one(1);
-if ($u->birthday->getValue() != null) {
-  throw new Exception();
-}
+check($u->birthday->getValue() == null);

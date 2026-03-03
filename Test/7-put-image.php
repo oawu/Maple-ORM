@@ -36,100 +36,66 @@ function resetImage($path1, $path2) {
   return User::create();
 }
 
+// === 初始值 ===
+title('初始值');
 $u = resetImage($path1, $path2);
+check($u->avatar1->getValue() === null);
+check($u->avatar2->getValue() === '');
 
-if ($u->avatar1->getValue() !== null) {
-  throw new Exception();
-}
-if ($u->avatar2->getValue() !== '') {
-  throw new Exception();
-}
-
+// === 指定後未儲存 ===
+title('指定後未儲存');
 $u->avatar1 = $path1;
-if (User::one()->avatar1->getValue() !== null) {
-  throw new Exception();
-}
+check(User::one()->avatar1->getValue() === null);
 
 $u->avatar2 = $path2;
-if (User::one()->avatar2->getValue() !== '') {
-  throw new Exception();
-}
+check(User::one()->avatar2->getValue() === '');
 
-if ($u->save() === null) {
-  throw new Exception();
-}
+// === save() 寫入 ===
+title('save() 寫入');
+check($u->save() !== null);
+check(User::one()->avatar1->getValue() !== null);
+check(User::one()->avatar2->getValue() !== '');
 
-if (User::one()->avatar1->getValue() === null) {
-  throw new Exception();
-}
-if (User::one()->avatar2->getValue() === '') {
-  throw new Exception();
-}
-
+// === 分次 save() ===
+title('分次 save()');
 $u = resetImage($path1, $path2);
-
-if ($u->avatar1->getValue() !== null) {
-  throw new Exception();
-}
-if ($u->avatar2->getValue() !== '') {
-  throw new Exception();
-}
+check($u->avatar1->getValue() === null);
+check($u->avatar2->getValue() === '');
 
 $u->avatar1 = $path1;
 $u->save();
-if (User::one()->avatar1->getValue() === null) {
-  throw new Exception();
-}
+check(User::one()->avatar1->getValue() !== null);
 
 $u->avatar2 = $path2;
 $u->save();
-if (User::one()->avatar2->getValue() === '') {
-  throw new Exception();
-}
+check(User::one()->avatar2->getValue() !== '');
 
+// === URL 與版本 ===
+title('URL 與版本');
 $u = resetImage($path1, $path2);
+check($u->avatar1->getUrl() === 'http://dev.orm.ioa.tw/404.png');
+check($u->avatar2->getUrl() === 'http://dev.orm.ioa.tw/404.png');
+check(array_keys($u->avatar1->getVersions()) === ['w100', 'rotate']);
+check(array_keys($u->avatar2->getVersions()) === ['w100']);
 
-if ($u->avatar1->getUrl() !== 'http://dev.orm.ioa.tw/404.png') {
-  throw new Exception();
-}
-if ($u->avatar2->getUrl() !== 'http://dev.orm.ioa.tw/404.png') {
-  throw new Exception();
-}
-if (array_keys($u->avatar1->getVersions()) !== ['w100', 'rotate']) {
-  throw new Exception();
-}
-if (array_keys($u->avatar2->getVersions()) !== ['w100']) {
-  throw new Exception();
-}
-
-
+// === 清除圖片 ===
+title('清除圖片');
 $u->avatar1 = $path1;
 $u->save();
 
 $u->avatar1 = '';
-
-if (User::one()->avatar1->getValue() === null) {
-  throw new Exception();
-}
+check(User::one()->avatar1->getValue() !== null);
 
 $u->avatar2 = $path2;
 $u->save();
 
 $u->avatar2 = '';
-
-if (User::one()->avatar2->getValue() === '') {
-  throw new Exception();
-}
+check(User::one()->avatar2->getValue() !== '');
 
 $u->avatar1 = '';
 $u->save();
-
-if (User::one()->avatar1->getValue() !== null) {
-  throw new Exception();
-}
+check(User::one()->avatar1->getValue() === null);
 
 $u->avatar2 = '';
 $u->save();
-if (User::one()->avatar2->getValue() !== '') {
-  throw new Exception();
-}
+check(User::one()->avatar2->getValue() === '');

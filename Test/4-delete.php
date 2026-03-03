@@ -36,53 +36,32 @@ function resetDeleteDate() {
   ]);
 }
 
+title('deletes() 全部刪除');
 resetDeleteDate();
-
 $count = \Model\Delete\User::deletes();
-if ($count != 3) {
-  throw new Exception();
-}
-if (\Model\Delete\User::count() != 0) {
-  throw new Exception();
-}
+check($count == 3);
+check(\Model\Delete\User::count() == 0);
 
+title('delete() 條件刪除');
 resetDeleteDate();
 $count = \Model\Delete\User::where('id', '>', 1)->delete();
-if ($count != 2) {
-  throw new Exception();
-}
-if (\Model\Delete\User::count() != 1) {
-  throw new Exception();
-}
-if (\Model\Delete\User::last()->id != 1) {
-  throw new Exception();
-}
+check($count == 2);
+check(\Model\Delete\User::count() == 1);
+check(\Model\Delete\User::last()->id == 1);
 
 resetDeleteDate();
 $count = \Model\Delete\User::where('id', '>', 10)->delete();
-if ($count != 0) {
-  throw new Exception();
-}
-if (\Model\Delete\User::last()->id != 3) {
-  throw new Exception();
-}
+check($count == 0);
+check(\Model\Delete\User::last()->id == 3);
 
+title('delete() 單筆刪除');
 resetDeleteDate();
 $u = \Model\Delete\User::one();
-if ($u->id != 1) {
-  throw new Exception();
-}
-if ($u->delete($count) === null && $count == 1) {
-  throw new Exception();
-}
+check($u->id == 1);
+check($u->delete($count) !== null);
+check($count == 1);
 
 $u = \Model\Delete\User::one();
-if ($u->id != 2) {
-  throw new Exception();
-}
-if ($u->delete($count) === null && $count == 1) {
-  throw new Exception();
-}
-if ($count != 1) {
-  throw new Exception();
-}
+check($u->id == 2);
+check($u->delete($count) !== null);
+check($count == 1);

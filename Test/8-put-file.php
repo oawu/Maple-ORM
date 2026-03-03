@@ -36,85 +36,70 @@ function resetFile($path1, $path2) {
   return User::create();
 }
 
+// === 初始值 ===
+title('初始值');
+
 $u = resetFile($path1, $path2);
 
-if ($u->info1->getValue() !== null) {
-  throw new Exception();
-}
-if ($u->info2->getValue() !== '') {
-  throw new Exception();
-}
+check($u->info1->getValue() === null);
+check($u->info2->getValue() === '');
+
+// === 指定後未儲存 ===
+title('指定後未儲存');
 
 $u->info1 = $path1;
-if (User::one()->info1->getValue() !== null) {
-  throw new Exception();
-}
-$u->info2 = $path2;
-if (User::one()->info2->getValue() !== '') {
-  throw new Exception();
-}
+check(User::one()->info1->getValue() === null);
 
-if ($u->save() === null) {
-  throw new Exception();
-}
-if (User::one()->info1->getValue() === null) {
-  throw new Exception();
-}
-if (User::one()->info2->getValue() === '') {
-  throw new Exception();
-}
+$u->info2 = $path2;
+check(User::one()->info2->getValue() === '');
+
+// === save() 寫入 ===
+title('save() 寫入');
+
+check($u->save() !== null);
+check(User::one()->info1->getValue() !== null);
+check(User::one()->info2->getValue() !== '');
+
+// === 分次 save() ===
+title('分次 save()');
 
 $u = resetFile($path1, $path2);
 
-if ($u->info1->getValue() !== null) {
-  throw new Exception();
-}
-if ($u->info2->getValue() !== '') {
-  throw new Exception();
-}
+check($u->info1->getValue() === null);
+check($u->info2->getValue() === '');
 
 $u->info1 = $path1;
 $u->save();
-if (User::one()->info1->getValue() === null) {
-  throw new Exception();
-}
+check(User::one()->info1->getValue() !== null);
 
 $u->info2 = $path2;
 $u->save();
-if (User::one()->info2->getValue() === '') {
-  throw new Exception();
-}
+check(User::one()->info2->getValue() !== '');
+
+// === URL ===
+title('URL');
 
 $u = resetFile($path1, $path2);
-if ($u->info1->getUrl() !== 'http://dev.orm.ioa.tw/404.png') {
-  throw new Exception();
-}
-if ($u->info2->getUrl() !== 'http://dev.orm.ioa.tw/404.png') {
-  throw new Exception();
-}
+check($u->info1->getUrl() === 'http://dev.orm.ioa.tw/404.png');
+check($u->info2->getUrl() === 'http://dev.orm.ioa.tw/404.png');
+
+// === 清除檔案 ===
+title('清除檔案');
 
 $u->info1 = $path1;
 $u->save();
 $u->info1 = '';
-if (User::one()->info1->getValue() === null) {
-  throw new Exception();
-}
+check(User::one()->info1->getValue() !== null);
 
 $u->info2 = $path2;
 $u->save();
 $u->info2 = '';
-if (User::one()->info2->getValue() === '') {
-  throw new Exception();
-}
+check(User::one()->info2->getValue() !== '');
 
 $u->info1 = '';
 $u->save();
-if (User::one()->info1->getValue() !== null) {
-  throw new Exception();
-}
+check(User::one()->info1->getValue() === null);
 
 $u->info2 = '';
 $u->save();
-if (User::one()->info2->getValue() !== '') {
-  throw new Exception();
-}
+check(User::one()->info2->getValue() === '');

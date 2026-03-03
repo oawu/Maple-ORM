@@ -18,8 +18,8 @@ if (!(file_exists($src2) || @copy(PATH_SAMPLE . 'avatar.png', $src2))) {
 }
 
 $uploader = new S3([
-  'bucket' => S3_BUCKET,
-  'region' => S3_REGION,
+  'bucket'    => S3_BUCKET,
+  'region'    => S3_REGION,
   'accessKey' => S3_ACCESSKEY,
   'secretKey' => S3_SECRETKEY,
 ]);
@@ -27,75 +27,35 @@ $uploader = new S3([
 $headersList = ['default' => [], 'options' => ['x-amz-acl' => 'public-read', 'Cache-Control' => 'max-age=60']];
 
 foreach ($headersList as $title => $headers) {
-  echo '' . $title . "\n";
-
-  echo '  putObjectStreaming - small file';
-  $s = microtime(true);
+  title("{$title}: putObjectStreaming（small）");
   $result = $uploader->putObjectStreaming($src1, $dest . $title . '/putObjectStreaming-small.jpg', $headers);
-  if (!is_array($result) || !isset($result['headers'])) {
-    throw new Exception('putObjectStreaming small failed');
-  }
-  echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
+  check(is_array($result) && isset($result['headers']));
 
-  echo '  putObjectMultipart - small file';
-  $s = microtime(true);
+  title("{$title}: putObjectMultipart（small）");
   $result = $uploader->putObjectMultipart($src1, $dest . $title . '/putObjectMultipart-small.jpg', $headers);
-  if (!is_array($result) || !isset($result['headers'])) {
-    throw new Exception('putObjectMultipart small failed');
-  }
-  echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
+  check(is_array($result) && isset($result['headers']));
 
-  echo '  putObject          - small file';
-  $s = microtime(true);
+  title("{$title}: putObject（small）");
   $result = $uploader->putObject($src1, $dest . $title . '/putObject-small.jpg', $headers);
-  if (!is_array($result) || !isset($result['headers'])) {
-    throw new Exception('putObject small failed');
-  }
-  echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
+  check(is_array($result) && isset($result['headers']));
 
-
-
-  echo '  putObjectStreaming - large file';
-  $s = microtime(true);
+  title("{$title}: putObjectStreaming（large）");
   $result = $uploader->putObjectStreaming($src2, $dest . $title . '/putObjectStreaming-large.png', $headers);
-  if (!is_array($result) || !isset($result['headers'])) {
-    throw new Exception('putObjectStreaming large failed');
-  }
-  echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
+  check(is_array($result) && isset($result['headers']));
 
-  echo '  putObjectMultipart - large file';
-  $s = microtime(true);
+  title("{$title}: putObjectMultipart（large）");
   $result = $uploader->putObjectMultipart($src2, $dest . $title . '/putObjectMultipart-large.png', $headers);
-  if (!is_array($result) || !isset($result['headers'])) {
-    throw new Exception('putObjectMultipart large failed');
-  }
-  echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
+  check(is_array($result) && isset($result['headers']));
 
-  echo '  putObject          - large file';
-  $s = microtime(true);
+  title("{$title}: putObject（large）");
   $result = $uploader->putObject($src2, $dest . $title . '/putObject-large.png', $headers);
-  if (!is_array($result) || !isset($result['headers'])) {
-    throw new Exception('putObject large failed');
-  }
-  echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
+  check(is_array($result) && isset($result['headers']));
 
-
-
-  echo '  copyObject';
-  $s = microtime(true);
+  title("{$title}: copyObject");
   $result = $uploader->copyObject($dest . $title . '/putObject-large.png', $dest . $title . '/putObject-large-copy.png');
-  if (!is_array($result) || !isset($result['headers'])) {
-    throw new Exception('copyObject failed');
-  }
-  echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
+  check(is_array($result) && isset($result['headers']));
 
-  echo '  deleteObject';
-  $s = microtime(true);
+  title("{$title}: deleteObject");
   $result = $uploader->deleteObject($dest . $title . '/putObject-large-copy.png');
-  if (!is_array($result) || !isset($result['headers'])) {
-    throw new Exception('deleteObject failed');
-  }
-  echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
-
-  echo "\n";
+  check(is_array($result) && isset($result['headers']));
 }

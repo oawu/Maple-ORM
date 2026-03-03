@@ -29,3 +29,35 @@ foreach (Connection::getDbs() as $db) {
 
 Model::setCaseTable(Model::CASE_CAMEL);
 Model::setCaseColumn(Model::CASE_CAMEL);
+
+if (!function_exists('title')) {
+  $_testTitle = null;
+
+  function title(string $text) {
+    global $_testTitle;
+    if ($_testTitle !== null) {
+      echo ' ✓';
+    }
+    $_testTitle = $text;
+    echo "\n      - " . $text;
+  }
+
+  function finish() {
+    global $_testTitle;
+    if ($_testTitle !== null) {
+      echo ' ✓';
+      $_testTitle = null;
+    }
+  }
+
+  function check(bool $condition, string $message = '') {
+    if (!$condition) {
+      throw new Exception($message ?: '斷言失敗');
+    }
+  }
+
+  function checkError($result, string $error) {
+    check($result === null);
+    check(Model::getLastLog() === $error, '錯誤訊息不符：' . Model::getLastLog());
+  }
+}
