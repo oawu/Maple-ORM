@@ -287,7 +287,7 @@ abstract class Uploader extends Plugin {
       throw new \Exception('找不到 Uploader Driver「' . $class . '」');
     }
 
-    $driver['instance'] = new $class($options);
-    return $driver['instance'];
+    $this->_driver['instance'] = new $class($options);
+    return $this->_driver['instance'];
   }
 }

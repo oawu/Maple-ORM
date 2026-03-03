@@ -60,26 +60,29 @@ final class Builder {
     return $this->where(...$args)->_reverseOrder()->limit(1)->_runSelect();
   }
   public function count(): ?int {
+    $savedSelect = $this->_getSelect();
+    $savedGroup = $this->_getGroup();
+    $savedType = $this->_type;
+
     $this->select('COUNT(*) as c')->group(null)->_setType(self::_TYPE_SELECT);
 
     $stmt = null;
     $error = Connection::instance($this->getDb())->runQuery($this->getSql(), $this->_getValues(), $stmt);
+
+    $this->select($savedSelect)->group($savedGroup);
+    $this->_type = $savedType;
+
     if ($error instanceof \Exception) {
       Model::executeLog('查詢資料庫錯誤，錯誤原因：' . $error->getMessage());
       return null;
     }
 
-    if (!$objs = array_map(fn($row) => $row, $stmt->fetchAll())) {
+    $row = $stmt->fetch();
+    if (!$row) {
       return 0;
     }
 
-    $obj = array_shift($objs);
-    if (!$obj) {
-      return 0;
-    }
-
-    $count = $obj['c'] ?? 0;
-    return (int) $count;
+    return (int)($row['c'] ?? 0);
   }
   public function getSql(): string {
     if ($this->_type == self::_TYPE_SELECT) {
@@ -567,7 +570,7 @@ final class Builder {
 
       foreach ($byKeys as $_key) {
         if (isset($obj->$_key)) {
-          $key .= $obj->$_key;
+          $key .= $obj->$_key . "\x00";
         }
       }
 
