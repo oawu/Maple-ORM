@@ -32,16 +32,25 @@ foreach ($headersList as $title => $headers) {
   echo '  putObjectStreaming - small file';
   $s = microtime(true);
   $result = $uploader->putObjectStreaming($src1, $dest . $title . '/putObjectStreaming-small.jpg', $headers);
+  if (!is_array($result) || !isset($result['headers'])) {
+    throw new Exception('putObjectStreaming small failed');
+  }
   echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
 
   echo '  putObjectMultipart - small file';
   $s = microtime(true);
   $result = $uploader->putObjectMultipart($src1, $dest . $title . '/putObjectMultipart-small.jpg', $headers);
+  if (!is_array($result) || !isset($result['headers'])) {
+    throw new Exception('putObjectMultipart small failed');
+  }
   echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
 
   echo '  putObject          - small file';
   $s = microtime(true);
   $result = $uploader->putObject($src1, $dest . $title . '/putObject-small.jpg', $headers);
+  if (!is_array($result) || !isset($result['headers'])) {
+    throw new Exception('putObject small failed');
+  }
   echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
 
 
@@ -49,16 +58,25 @@ foreach ($headersList as $title => $headers) {
   echo '  putObjectStreaming - large file';
   $s = microtime(true);
   $result = $uploader->putObjectStreaming($src2, $dest . $title . '/putObjectStreaming-large.png', $headers);
+  if (!is_array($result) || !isset($result['headers'])) {
+    throw new Exception('putObjectStreaming large failed');
+  }
   echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
 
   echo '  putObjectMultipart - large file';
   $s = microtime(true);
   $result = $uploader->putObjectMultipart($src2, $dest . $title . '/putObjectMultipart-large.png', $headers);
+  if (!is_array($result) || !isset($result['headers'])) {
+    throw new Exception('putObjectMultipart large failed');
+  }
   echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
 
   echo '  putObject          - large file';
   $s = microtime(true);
   $result = $uploader->putObject($src2, $dest . $title . '/putObject-large.png', $headers);
+  if (!is_array($result) || !isset($result['headers'])) {
+    throw new Exception('putObject large failed');
+  }
   echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
 
 
@@ -66,11 +84,17 @@ foreach ($headersList as $title => $headers) {
   echo '  copyObject';
   $s = microtime(true);
   $result = $uploader->copyObject($dest . $title . '/putObject-large.png', $dest . $title . '/putObject-large-copy.png');
+  if (!is_array($result) || !isset($result['headers'])) {
+    throw new Exception('copyObject failed');
+  }
   echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
 
   echo '  deleteObject';
   $s = microtime(true);
   $result = $uploader->deleteObject($dest . $title . '/putObject-large-copy.png');
+  if (!is_array($result) || !isset($result['headers'])) {
+    throw new Exception('deleteObject failed');
+  }
   echo ' - ' . (microtime(true) - $s) . ' - ok' . "\n";
 
   echo "\n";

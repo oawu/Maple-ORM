@@ -14,6 +14,7 @@ echo '  08. 測試 Put File'; include PATH . 'Test/8-put-file.php'; echo ' - ok'
 echo '  09. 測試 DB Read Write'; include PATH . 'Test/9-db-read-write.php'; echo ' - ok' . "\n";
 echo '  10. 測試 Thumbnail'; include PATH . 'Test/10-Thumbnail.php'; echo ' - ok' . "\n";
 echo '  11. 測試 S3 Driver'; include PATH . 'Test/11-driver-s3.php'; echo ' - ok' . "\n";
+echo '  12. 測試 Advanced Query'; include PATH . 'Test/12-advanced-query.php'; echo ' - ok' . "\n";
 
 @exec('rm -rf ' . PATH_TMP . '*');
 @exec('rm -rf ' . PATH_STORAGE . '*');

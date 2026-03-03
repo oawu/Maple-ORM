@@ -47,17 +47,19 @@ Maple ORM 是從 [Maple 9](https://github.com/oawu/Maple) 框架抽出的獨立 
 │       └── S3.php        # S3 操作
 ├── Model/                # 測試用 Model（按功能分類）
 │   ├── Create/、Select/、Update/、Delete/
-│   ├── Relation/、Transaction/
+│   ├── Relation/、Transaction/、AdvancedQuery/
 │   ├── Image/、File/、ReadWrite/
 ├── Test/                 # 測試檔案
 │   ├── 0.php             # 共用設定
-│   ├── 1-create.php ~ 11-driver-s3.php
+│   ├── 1-create.php ~ 12-advanced-query.php
 ├── Guide/                # 使用文件（Markdown）
 │   ├── 00_config.md ~ 08_uploader.md
 ├── Sample/               # 測試用範例檔案（圖片、字型）
 ├── Storage/              # 本地檔案儲存（測試用）
 ├── Tmp/                  # 暫存目錄（測試用）
-├── Config.php            # 資料庫設定（含密碼，勿提交）
+├── Config.php            # ORM 初始化邏輯（git 追蹤）
+├── Config.local.php      # 敏感設定值：DB 密碼、S3 金鑰（gitignored）
+├── Config.local.sample.php # Config.local.php 範本（git 追蹤）
 ├── Autoload.php          # PSR-4 自動載入
 ├── index.php             # 測試入口
 ├── Test.php              # 測試執行器
@@ -176,7 +178,20 @@ docker exec php zsh -c "cd ~/Workspace/99_Maple-ORM && php index.php"
 | 08 | 8-put-file.php | 檔案上傳、大小/類型驗證 |
 | 09 | 9-db-read-write.php | 讀寫分離 |
 | 10 | 10-Thumbnail.php | GD/ImageMagick 縮圖 |
-| 11 | 11-driver-s3.php | S3 驅動 |
+| 11 | 11-driver-s3.php | S3 驅動（需填入 S3 金鑰） |
+| 12 | 12-advanced-query.php | whereGroup、group/having、orWhereIn/orWhereBetween、WHERE NULL、多欄排序、set()、toArray/$hides、__isset |
+
+### 設定檔
+
+測試前需先建立本地設定檔：
+
+```bash
+cp Config.local.sample.php Config.local.php
+# 編輯 Config.local.php 填入 DB 密碼和 S3 金鑰
+```
+
+- `Config.local.php` 已加入 `.gitignore`，不會被提交
+- `Config.local.sample.php` 為範本，已提交至 git
 
 ### 測試結構慣例
 
