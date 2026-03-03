@@ -7,7 +7,7 @@ use \Orm\Core\Connection;
 
 abstract class Helper {
   public static function version() {
-    return '9.0.1';
+    return '9.1.0';
   }
   public static function attrsToStrings(string $type, $val) {
     if ($type == 'json') {
