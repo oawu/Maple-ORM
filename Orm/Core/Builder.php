@@ -287,6 +287,48 @@ final class Builder {
   public function orBetween(string $key, $val1, $val2): self {
     return $this->orWhereBetween($key, $val1, $val2);
   }
+  public function whereGroup(callable $callback): self {
+    $tmp = Builder::create($this->_db, $this->_class);
+    $callback($tmp);
+
+    $str = $tmp->_getWhere();
+    if ($str === null) {
+      return $this;
+    }
+
+    $vals = $tmp->_getValues();
+    $where = $this->_getWhere();
+
+    if ($where !== null) {
+      $this->_setWhere('(' . $where . ') AND (' . $str . ')');
+    } else {
+      $this->_setWhere($str);
+    }
+
+    $_vals = $this->_getValues();
+    return $this->_setValues([...$_vals, ...$vals]);
+  }
+  public function orWhereGroup(callable $callback): self {
+    $tmp = Builder::create($this->_db, $this->_class);
+    $callback($tmp);
+
+    $str = $tmp->_getWhere();
+    if ($str === null) {
+      return $this;
+    }
+
+    $vals = $tmp->_getValues();
+    $where = $this->_getWhere();
+
+    if ($where !== null) {
+      $this->_setWhere('(' . $where . ') OR (' . $str . ')');
+    } else {
+      $this->_setWhere($str);
+    }
+
+    $_vals = $this->_getValues();
+    return $this->_setValues([...$_vals, ...$vals]);
+  }
   public function has(string $fk, string $pk, ?int $val): self {
     return $this->where($fk, $val)->_setRelation(['key1' => $fk, 'key2' => $pk, 'val' => $val]);
   }

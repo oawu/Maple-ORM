@@ -361,6 +361,9 @@ abstract class Model {
   public static function between(string $key, $val1, $val2): Builder {
     return Builder::create(null, static::class)->whereBetween($key, $val1, $val2);
   }
+  public static function whereGroup(callable $callback): Builder {
+    return Builder::create(null, static::class)->whereGroup($callback);
+  }
   public function hasMany(string $class, ?string $fk = null, ?string $pk = Model::PRIMARY_ID): Builder {
     return static::_has('all', $this, $class, $fk, $pk);
   }
