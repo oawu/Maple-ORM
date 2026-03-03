@@ -1,9 +1,9 @@
 {
   "permissions": {
     "deny": [
-      "Read(Config.php)",
-      "Edit(Config.php)",
-      "Write(Config.php)"
+      "Read(Config.local.php)",
+      "Edit(Config.local.php)",
+      "Write(Config.local.php)"
     ]
   }
 }

@@ -10,11 +10,6 @@ define('PATH_TMP', PATH . 'Tmp' . DIRECTORY_SEPARATOR);
 define('PATH_FONT', PATH_SAMPLE . 'Hack-Regular.ttf');
 define('BASE_URL', 'http://dev.orm.ioa.tw/');
 
-define('S3_BUCKET', '');
-define('S3_REGION', '');
-define('S3_ACCESSKEY', '');
-define('S3_SECRETKEY', '');
-
 include PATH . 'Autoload.php';
 include PATH . 'Config.php';
 
