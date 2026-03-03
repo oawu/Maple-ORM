@@ -69,7 +69,7 @@ final class Builder {
     $stmt = null;
     $error = Connection::instance($this->getDb())->runQuery($this->getSql(), $this->_getValues(), $stmt);
 
-    $this->select($savedSelect)->group($savedGroup);
+    $this->_setSelect($savedSelect)->group($savedGroup);
     $this->_type = $savedType;
 
     if ($error instanceof \Exception) {
