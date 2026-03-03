@@ -179,7 +179,7 @@ docker exec php zsh -c "cd ~/Workspace/99_Maple-ORM && php index.php"
 | 09 | 9-db-read-write.php | 讀寫分離 |
 | 10 | 10-Thumbnail.php | GD/ImageMagick 縮圖 |
 | 11 | 11-driver-s3.php | S3 驅動（需填入 S3 金鑰） |
-| 12 | 12-advanced-query.php | whereGroup、group/having、orWhereIn/orWhereBetween、WHERE NULL、多欄排序、set()、toArray/$hides、__isset |
+| 12 | 12-advanced-query.php | whereGroup、group/having、orWhereIn/orWhereBetween、WHERE NULL、多欄排序、LIKE、關聯式陣列 WHERE、byKey 分組、DateTime Plugin、attrs()、toArray raw/$hides、set($save)、save($count)、__isset |
 
 ### 設定檔
 

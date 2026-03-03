@@ -40,10 +40,9 @@ php index.php
 | 09 | 讀寫分離 |
 | 10 | 縮圖（GD / ImageMagick） |
 | 11 | S3 驅動（需填入 S3 金鑰） |
-| 12 | 進階查詢（whereGroup、group/having、WHERE NULL、多欄排序、set、toArray） |
+| 12 | 進階查詢（whereGroup、group/having、WHERE NULL、LIKE、關聯式陣列 WHERE、byKey、DateTime Plugin、attrs、toArray、set、save） |
 
 ## 文件
-文件可以參考 [Gitbook 文件](https://oawu.gitbook.io/maple-orm/)，或者以下 Guide
 
 * [初始設定](Guide/00_config.md)
 * [新增資料](Guide/01_create.md)
