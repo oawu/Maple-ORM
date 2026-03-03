@@ -1,22 +1,22 @@
 <?php
 
 \Orm\Model::setConfig('', \Orm\Core\Config::create()
-  ->setHostname('db-mysql-8.3')
+  ->setHostname('db-mysql')
   ->setUsername('root')
   ->setPassword('1234')
-  ->setDatabase('maple-orm'));
+  ->setDatabase('orm'));
 
 \Orm\Model::setConfig('R', \Orm\Core\Config::create()
-  ->setHostname('db-mysql-8.3')
+  ->setHostname('db-mysql')
   ->setUsername('root')
   ->setPassword('1234')
-  ->setDatabase('maple-orm-R'));
+  ->setDatabase('orm_r'));
 
 \Orm\Model::setConfig('W', \Orm\Core\Config::create()
-  ->setHostname('db-mysql-8.3')
+  ->setHostname('db-mysql')
   ->setUsername('root')
   ->setPassword('1234')
-  ->setDatabase('maple-orm-W'));
+  ->setDatabase('orm_w'));
 
 \Orm\Model::setNamespace('Model');
 
@@ -29,7 +29,7 @@
 });
 
 \Orm\Model::setQueryLogFunc(static function (string $db, string $sql, array $vals, bool $status, float $during) {
-  var_dump($db, $sql, $vals, $status, $during);
+  // var_dump($db, $sql, $vals, $status, $during);
 });
 \Orm\Model::setLogFunc(static function (string $message) {
   // var_dump($message);
