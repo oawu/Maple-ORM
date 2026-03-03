@@ -12,9 +12,35 @@
 * 支援多組資料庫，可以讀寫分離
 
 ## 測試
-1. 修改 `Config.php` 內容
-1. 修改 `index.php` 的 `S3` 相關 `define` 內容
-2. 專案目錄下執行 `php index.php` 即可測試
+
+### 設定
+1. 複製設定範本：`cp Config.local.sample.php Config.local.php`
+2. 編輯 `Config.local.php`，填入 DB 連線資訊與 S3 金鑰
+
+### 執行
+```bash
+# 透過 Docker 執行
+docker exec php zsh -c "cd ~/Workspace/99_Maple-ORM && php index.php"
+
+# 或本機有 PHP 環境時直接執行
+php index.php
+```
+
+### 測試項目
+| # | 測試內容 |
+|---|----------|
+| 01 | CREATE 單筆/批次 |
+| 02 | SELECT 查詢、WHERE 變體、排序 |
+| 03 | UPDATE 整筆/部分 |
+| 04 | DELETE |
+| 05 | 關聯（延遲/預先載入） |
+| 06 | Transaction |
+| 07 | 圖片上傳（Local） |
+| 08 | 檔案上傳（Local） |
+| 09 | 讀寫分離 |
+| 10 | 縮圖（GD / ImageMagick） |
+| 11 | S3 驅動（需填入 S3 金鑰） |
+| 12 | 進階查詢（whereGroup、group/having、WHERE NULL、多欄排序、set、toArray） |
 
 ## 文件
 文件可以參考 [Gitbook 文件](https://oawu.gitbook.io/maple-orm/)，或者以下 Guide
