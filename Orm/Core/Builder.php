@@ -566,13 +566,15 @@ final class Builder {
     $groups = [];
     foreach ($objs as $obj) {
 
-      $key = '';
+      $parts = [];
 
       foreach ($byKeys as $_key) {
         if (isset($obj->$_key)) {
-          $key .= $obj->$_key . "\x00";
+          $parts[] = $obj->$_key;
         }
       }
+
+      $key = implode("\x00", $parts);
 
       if (!isset($groups[$key])) {
         $groups[$key] = [];
