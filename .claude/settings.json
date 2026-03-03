@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(Config.php)",
+      "Edit(Config.php)",
+      "Write(Config.php)"
+    ]
+  }
+}
