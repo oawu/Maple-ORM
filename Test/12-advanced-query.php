@@ -120,6 +120,123 @@ if ($users[2]->name != 'OB') {
   throw new Exception('multi order failed: third should be OB (girl, id=2)');
 }
 
+// === LIKE 運算子 ===
+$users = \Model\AdvancedQuery\User::where('name', 'LIKE', 'O%')->all();
+if (count($users) != 3) {
+  throw new Exception('LIKE failed: expected 3, got ' . count($users));
+}
+
+$users = \Model\AdvancedQuery\User::where('name', 'LIKE', 'OA')->all();
+if (count($users) != 1 || $users[0]->name != 'OA') {
+  throw new Exception('LIKE exact match failed');
+}
+
+// === 關聯式陣列 WHERE ===
+$users = \Model\AdvancedQuery\User::where(['sex' => 'boy', 'name' => 'OA'])->all();
+if (count($users) != 1 || $users[0]->name != 'OA') {
+  throw new Exception('associative array where failed');
+}
+
+$users = \Model\AdvancedQuery\User::where(['sex' => 'boy', 'id' => [1, 3]])->all();
+if (count($users) != 2) {
+  throw new Exception('associative array where with IN failed: expected 2, got ' . count($users));
+}
+
+// === byKey 單鍵分組 ===
+$groups = \Model\AdvancedQuery\User::byKey('sex')->all();
+if (count($groups) != 2) {
+  throw new Exception('byKey sex failed: expected 2 groups, got ' . count($groups));
+}
+if (count($groups['boy']) != 2) {
+  throw new Exception('byKey boy count failed');
+}
+if (count($groups['girl']) != 1) {
+  throw new Exception('byKey girl count failed');
+}
+
+// === byKey 多鍵分組 ===
+$groups = \Model\AdvancedQuery\User::byKey('sex', 'name')->all();
+if (count($groups) != 3) {
+  throw new Exception('byKey multi-key failed: expected 3 groups, got ' . count($groups));
+}
+
+// === DateTime Plugin: format() 自訂格式 ===
+$user = \Model\AdvancedQuery\User::one(1);
+$formatted = $user->birthday->format('Y/m/d');
+if ($formatted != '1989/07/21') {
+  throw new Exception('DateTime format failed: expected 1989/07/21, got ' . $formatted);
+}
+
+// === DateTime Plugin: getDatetime() ===
+$dt = $user->birthday->getDatetime();
+if (!($dt instanceof \DateTime)) {
+  throw new Exception('DateTime getDatetime() should return DateTime instance');
+}
+if ($dt->format('Y-m-d') != '1989-07-21') {
+  throw new Exception('DateTime getDatetime format failed');
+}
+
+// === DateTime Plugin: unix() ===
+$unix = $user->birthday->unix();
+if (!is_int($unix)) {
+  throw new Exception('DateTime unix() should return int');
+}
+
+// === DateTime Plugin: null 值回傳 default ===
+$user3 = \Model\AdvancedQuery\User::one(3);
+if ($user3->createAt->getValue() === null) {
+  throw new Exception('DateTime createAt should not be null');
+}
+if ($user3->createAt->format('Y-m-d') === null) {
+  throw new Exception('DateTime createAt format should not return null');
+}
+
+// === attrs() 取得全部屬性 ===
+$user = \Model\AdvancedQuery\User::one(1);
+$allAttrs = $user->attrs();
+if (!is_array($allAttrs)) {
+  throw new Exception('attrs() should return array');
+}
+if (!array_key_exists('id', $allAttrs)) {
+  throw new Exception('attrs() should contain id');
+}
+if (!array_key_exists('name', $allAttrs)) {
+  throw new Exception('attrs() should contain name');
+}
+
+// === attrs() 取得指定 key ===
+if ($user->attrs('name') != 'OA') {
+  throw new Exception('attrs(key) failed');
+}
+
+// === attrs() 不存在的 key 回傳 default ===
+if ($user->attrs('nonExistent', 'fallback') != 'fallback') {
+  throw new Exception('attrs(key, default) failed');
+}
+
+// === toArray(true) raw 模式 ===
+$raw = $user->toArray(true);
+if (!is_array($raw)) {
+  throw new Exception('toArray(true) should return array');
+}
+if (array_key_exists('bio', $raw)) {
+  throw new Exception('toArray(true) should still respect $hides');
+}
+if ($raw['birthday'] != '1989-07-21') {
+  throw new Exception('toArray(true) birthday should be raw string: ' . $raw['birthday']);
+}
+
+// === toArray(false) 非 raw 模式 DateTime 格式化 ===
+$normal = $user->toArray(false);
+if ($normal['birthday'] != '1989-07-21') {
+  throw new Exception('toArray(false) birthday should be formatted string');
+}
+
+// === __isset() 不存在的欄位 ===
+if (isset($user->nonExistentField)) {
+  throw new Exception('__isset non-existent field should return false');
+}
+
 // === set() 方法 ===
 $user = \Model\AdvancedQuery\User::one(1);
 $user->set(['name' => 'XX', 'bio' => 'YY']);
@@ -172,3 +289,37 @@ if (!isset($user->name)) {
 if (!isset($user->id)) {
   throw new Exception('__isset id failed');
 }
+
+// === save() 帶 $count 參數 ===
+$user = \Model\AdvancedQuery\User::one(2);
+$user->name = 'OB-updated';
+$count = 0;
+$user->save($count);
+if ($count != 1) {
+  throw new Exception('save() count failed: expected 1, got ' . $count);
+}
+
+// === save() 無變更時 $count = 1（短路回傳） ===
+$count = 0;
+$user->save($count);
+if ($count != 1) {
+  throw new Exception('save() no-change count should be 1, got ' . $count);
+}
+
+$user = \Model\AdvancedQuery\User::one(2);
+if ($user->name != 'OB-updated') {
+  throw new Exception('save() with count persist failed');
+}
+$user->name = 'OB';
+$user->save();
+
+// === set() 搭配 $save=true 自動儲存 ===
+$user = \Model\AdvancedQuery\User::one(3);
+$user->set(['name' => 'OC-auto'], [], true);
+
+$user = \Model\AdvancedQuery\User::one(3);
+if ($user->name != 'OC-auto') {
+  throw new Exception('set() with save=true failed');
+}
+$user->name = 'OC';
+$user->save();
