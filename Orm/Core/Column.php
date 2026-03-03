@@ -180,8 +180,6 @@ final class Column {
       default:
         return $this->_parseString($newValue);
     }
-
-    return $newValue;
   }
   public function initWith(?Model $model, $value, ?array $plugin) {
     if ($value === null && !$this->getIsNullable() && !$this->getIsAutoIncrement()) {
@@ -242,8 +240,6 @@ final class Column {
       default:
         return $this->_parseString($value);
     }
-
-    return $value;
   }
   public function getType(): string {
     return $this->_type;

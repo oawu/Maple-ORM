@@ -587,14 +587,15 @@ final class Builder {
       $tmps = [];
       $parts = explode(',', $order);
       foreach ($parts as $part) {
-        $v = trim(strtolower($part));
+        $part = trim($part);
+        $lower = strtolower($part);
 
-        if (strpos($v, ' asc') !== false) {
-          $tmps[] = preg_replace('/asc/i', 'DESC', $v);
-        } else if (strpos($v, ' desc') !== false) {
-          $tmps[] = preg_replace('/desc/i', 'ASC', $v);
+        if (strpos($lower, ' asc') !== false) {
+          $tmps[] = preg_replace('/\s+asc\s*$/i', ' DESC', $part);
+        } else if (strpos($lower, ' desc') !== false) {
+          $tmps[] = preg_replace('/\s+desc\s*$/i', ' ASC', $part);
         } else {
-          $tmps[] = $v . ' DESC';
+          $tmps[] = $part . ' DESC';
         }
       }
 
